@@ -85,78 +85,78 @@ public class Codegen {
         return gen(cacheKey, type, viewClazz);
     }
 
-    private static synchronized Encoder gen(String cacheKey, Type type) {
-    	
-    	System.out.println("creating encoder for key: " + cacheKey + " for type " + type);
-    	
-        Encoder encoder = JsoniterSpi.getEncoder(cacheKey);
-        if (encoder != null) {
-            return encoder;
-        }
-        List<Extension> extensions = JsoniterSpi.getExtensions();
-        for (Extension extension : extensions) {
-            encoder = extension.createEncoder(cacheKey, type);
-            if (encoder != null) {
-                JsoniterSpi.addNewEncoder(cacheKey, encoder);
-                return encoder;
-            }
-        }
-        encoder = CodegenImplNative.NATIVE_ENCODERS.get(type);
-        if (encoder != null) {
-            JsoniterSpi.addNewEncoder(cacheKey, encoder);
-            return encoder;
-        }
-        Type[] typeArgs = new Type[0];
-        Class clazz;
-        if (type instanceof ParameterizedType) {
-            ParameterizedType pType = (ParameterizedType) type;
-            clazz = (Class) pType.getRawType();
-            typeArgs = pType.getActualTypeArguments();
-        } else {
-            clazz = (Class) type;
-        }
-        if (mode == EncodingMode.REFLECTION_MODE) {
-            encoder = ReflectionEncoderFactory.create(clazz, typeArgs);
-            JsoniterSpi.addNewEncoder(cacheKey, encoder);
-            return encoder;
-        }
-        if (!isDoingStaticCodegen) {
-            try {
-                encoder = (Encoder) Class.forName(cacheKey).newInstance();
-                JsoniterSpi.addNewEncoder(cacheKey, encoder);
-                return encoder;
-            } catch (Exception e) {
-                if (mode == EncodingMode.STATIC_MODE) {
-                    throw new JsonException("static gen should provide the encoder we need, but failed to create the encoder", e);
-                }
-            }
-        }
-        clazz = chooseAccessibleSuper(clazz);
-        CodegenResult source = genSource(cacheKey, clazz, typeArgs);
-        try {
-            generatedSources.put(cacheKey, source);
-            if (isDoingStaticCodegen) {
-                staticGen(clazz, cacheKey, source);
-            } else {
-                encoder = DynamicCodegen.gen(clazz, cacheKey, source);
-            }
-            JsoniterSpi.addNewEncoder(cacheKey, encoder);
-            return encoder;
-        } catch (Exception e) {
-            String msg = "failed to generate encoder for: " + type + " with " + Arrays.toString(typeArgs) + ", exception: " + e;
-            msg = msg + "\n" + source;
-            throw new JsonException(msg, e);
-        }
-    }
+//    private static synchronized Encoder gen(String cacheKey, Type type) {
+//    	
+//    	System.out.println("creating encoder for key: " + cacheKey + " for type " + type);
+//    	
+//        Encoder encoder = JsoniterSpi.getEncoder(cacheKey);
+//        if (encoder != null) {
+//            return encoder;
+//        }
+//        List<Extension> extensions = JsoniterSpi.getExtensions();
+//        for (Extension extension : extensions) {
+//            encoder = extension.createEncoder(cacheKey, type);
+//            if (encoder != null) {
+//                JsoniterSpi.addNewEncoder(cacheKey, encoder);
+//                return encoder;
+//            }
+//        }
+//        encoder = CodegenImplNative.NATIVE_ENCODERS.get(type);
+//        if (encoder != null) {
+//            JsoniterSpi.addNewEncoder(cacheKey, encoder);
+//            return encoder;
+//        }
+//        Type[] typeArgs = new Type[0];
+//        Class clazz;
+//        if (type instanceof ParameterizedType) {
+//            ParameterizedType pType = (ParameterizedType) type;
+//            clazz = (Class) pType.getRawType();
+//            typeArgs = pType.getActualTypeArguments();
+//        } else {
+//            clazz = (Class) type;
+//        }
+//        if (mode == EncodingMode.REFLECTION_MODE) {
+//            encoder = ReflectionEncoderFactory.create(clazz, typeArgs);
+//            JsoniterSpi.addNewEncoder(cacheKey, encoder);
+//            return encoder;
+//        }
+//        if (!isDoingStaticCodegen) {
+//            try {
+//                encoder = (Encoder) Class.forName(cacheKey).newInstance();
+//                JsoniterSpi.addNewEncoder(cacheKey, encoder);
+//                return encoder;
+//            } catch (Exception e) {
+//                if (mode == EncodingMode.STATIC_MODE) {
+//                    throw new JsonException("static gen should provide the encoder we need, but failed to create the encoder", e);
+//                }
+//            }
+//        }
+//        clazz = chooseAccessibleSuper(clazz);
+//        CodegenResult source = genSource(cacheKey, clazz, typeArgs);
+//        try {
+//            generatedSources.put(cacheKey, source);
+//            if (isDoingStaticCodegen) {
+//                staticGen(clazz, cacheKey, source);
+//            } else {
+//                encoder = DynamicCodegen.gen(clazz, cacheKey, source);
+//            }
+//            JsoniterSpi.addNewEncoder(cacheKey, encoder);
+//            return encoder;
+//        } catch (Exception e) {
+//            String msg = "failed to generate encoder for: " + type + " with " + Arrays.toString(typeArgs) + ", exception: " + e;
+//            msg = msg + "\n" + source;
+//            throw new JsonException(msg, e);
+//        }
+//    }
     
     private static synchronized Encoder gen(String cacheKey, Type type, Class viewClazz) {
     	
     	System.out.println("gen encoder with key: " + cacheKey + "  for type " + type + " viewClass " + viewClazz );
     	
-    	if(viewClazz == null)
-    	{
-    		return gen(cacheKey,type);
-    	}
+//    	if(viewClazz == null)
+//    	{
+//    		return gen(cacheKey,type);
+//    	}
 
         Encoder encoder = JsoniterSpi.getEncoder(cacheKey);
         if (encoder != null) {
@@ -281,32 +281,32 @@ public class Codegen {
             parent = current;
         }
     }
-
-    private static CodegenResult genSource(String cacheKey, Class clazz, Type[] typeArgs) {
-        if (clazz.isArray()) {
-            return CodegenImplArray.genArray(cacheKey, clazz);
-        }
-        if (Map.class.isAssignableFrom(clazz)) {
-            return CodegenImplMap.genMap(cacheKey, clazz, typeArgs);
-        }
-        if (Collection.class.isAssignableFrom(clazz)) {
-            return CodegenImplArray.genCollection(cacheKey, clazz, typeArgs);
-        }
-        if (clazz.isEnum()) {
-            return CodegenImplNative.genEnum(clazz);
-        }
-        return CodegenImplObject.genObject(clazz);
-    }
+//
+//    private static CodegenResult genSource(String cacheKey, Class clazz, Type[] typeArgs) {
+//        if (clazz.isArray()) {
+//            return CodegenImplArray.genArray(cacheKey, clazz, null);
+//        }
+//        if (Map.class.isAssignableFrom(clazz)) {
+//            return CodegenImplMap.genMap(cacheKey, clazz, null, typeArgs);
+//        }
+//        if (Collection.class.isAssignableFrom(clazz)) {
+//            return CodegenImplArray.genCollection(cacheKey, clazz, null, typeArgs);
+//        }
+//        if (clazz.isEnum()) {
+//            return CodegenImplNative.genEnum(clazz);
+//        }
+//        return CodegenImplObject.genObject(clazz);
+//    }
     
     private static CodegenResult genSource(String cacheKey, Class clazz, Class viewClazz, Type[] typeArgs) {
         if (clazz.isArray()) {
-            return CodegenImplArray.genArray(cacheKey, clazz);
+            return CodegenImplArray.genArray(cacheKey, clazz, viewClazz);
         }
         if (Map.class.isAssignableFrom(clazz)) {
-            return CodegenImplMap.genMap(cacheKey, clazz, typeArgs);
+            return CodegenImplMap.genMap(cacheKey, clazz, viewClazz, typeArgs);
         }
         if (Collection.class.isAssignableFrom(clazz)) {
-            return CodegenImplArray.genCollection(cacheKey, clazz, typeArgs);
+            return CodegenImplArray.genCollection(cacheKey, clazz,viewClazz, typeArgs);
         }
         if (clazz.isEnum()) {
             return CodegenImplNative.genEnum(clazz);
@@ -317,7 +317,7 @@ public class Codegen {
     public static void staticGenEncoders(TypeLiteral[] typeLiterals) {
         isDoingStaticCodegen = true;
         for (TypeLiteral typeLiteral : typeLiterals) {
-            gen(typeLiteral.getEncoderCacheKey(), typeLiteral.getType());
+            gen(typeLiteral.getEncoderCacheKey(), typeLiteral.getType(), null);
         }
     }
 }

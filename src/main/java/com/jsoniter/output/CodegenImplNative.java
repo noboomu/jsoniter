@@ -264,21 +264,33 @@ public class CodegenImplNative {
         });
     }};
 
-    public static void genWriteOp(CodegenResult ctx, String code, Type valueType, boolean isNullable) {
-        genWriteOp(ctx, code, valueType,null,  isNullable, true);
+    public static void genWriteOp(CodegenResult ctx, String code, Type valueType,  Class viewClazz,boolean isNullable) {
+        genWriteOp(ctx, code, valueType,viewClazz,  isNullable, true);
     }
 
-    public static void genWriteOp(CodegenResult ctx, String code, Type valueType, Class viewClass, boolean isNullable, boolean isCollectionValueNullable) {
-        String cacheKey = TypeLiteral.create(valueType).getEncoderCacheKey();
+    public static void genWriteOp(CodegenResult ctx, String code, Type valueType, Class viewClazz, boolean isNullable, boolean isCollectionValueNullable) {
+    	
+	final Type type;
+    	
+    	if(viewClazz != null)
+    	{
+    		  type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
+    	}
+    	else
+    	{
+    		type = valueType;
+    	}
+    	
+        String cacheKey = TypeLiteral.create(type).getEncoderCacheKey();
         if (JsoniterSpi.getEncoder(cacheKey) == null) {
-            if (!isNullable && String.class == valueType) {
+            if (!isNullable && String.class == type) {
                 ctx.buffer('"');
                 ctx.append(String.format("com.jsoniter.output.CodegenAccess.writeStringWithoutQuote((java.lang.String)%s, stream);", code));
                 ctx.buffer('"');
                 return;
             }
-            if (NATIVE_ENCODERS.containsKey(valueType)) {
-                ctx.append(String.format("stream.writeVal((%s)%s);", getTypeName(valueType), code));
+            if (NATIVE_ENCODERS.containsKey(type)) {
+                ctx.append(String.format("stream.writeVal((%s)%s);", getTypeName(type), code));
                 return;
             }
         }
@@ -286,24 +298,24 @@ public class CodegenImplNative {
         if (!isCollectionValueNullable) {
             cacheKey = cacheKey + "__value_not_nullable";
         }
-        if (viewClass != null) {
-            cacheKey = cacheKey + "__" + viewClass.getSimpleName()+"View";
-        }
-        Codegen.getEncoder(cacheKey, valueType,null);
+//        if (viewClass != null) {
+//            cacheKey = cacheKey + "__" + viewClass.getSimpleName()+"View";
+//        }
+        Codegen.getEncoder(cacheKey, type,viewClazz);
         CodegenResult generatedSource = Codegen.getGeneratedSource(cacheKey);
         if (generatedSource != null) {
             if (isNullable) {
                 ctx.appendBuffer();
                 ctx.append(CodegenResult.bufferToWriteOp(generatedSource.prelude));
-                ctx.append(String.format("%s.encode_((%s)%s, stream);", cacheKey, getTypeName(valueType), code));
+                ctx.append(String.format("%s.encode_((%s)%s, stream);", cacheKey, getTypeName(type), code));
                 ctx.append(CodegenResult.bufferToWriteOp(generatedSource.epilogue));
             } else {
                 ctx.buffer(generatedSource.prelude);
-                ctx.append(String.format("%s.encode_((%s)%s, stream);", cacheKey, getTypeName(valueType), code));
+                ctx.append(String.format("%s.encode_((%s)%s, stream);", cacheKey, getTypeName(type), code));
                 ctx.buffer(generatedSource.epilogue);
             }
         } else {
-            ctx.append(String.format("com.jsoniter.output.CodegenAccess.writeVal(\"%s\", (%s)%s, stream);", cacheKey, getTypeName(valueType), code));
+            ctx.append(String.format("com.jsoniter.output.CodegenAccess.writeVal(\"%s\", (%s)%s, stream);", cacheKey, getTypeName(type), code));
         }
     }
 

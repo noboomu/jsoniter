@@ -146,8 +146,8 @@ public class JsoniterSpi {
         desc.clazz = clazz;
         desc.lookup = lookup;
         desc.ctor = getCtor(clazz);
-        desc.fields = getFields(lookup, clazz, includingPrivate);
-        desc.setters = getSetters(lookup, clazz, includingPrivate);
+        desc.fields = getFields(lookup, clazz, null,includingPrivate);
+        desc.setters = getSetters(lookup, clazz,null, includingPrivate);
         desc.wrappers = new ArrayList<WrapperDescriptor>();
         desc.unWrappers = new ArrayList<Method>();
         for (Extension extension : extensions) {
@@ -197,8 +197,8 @@ public class JsoniterSpi {
         ClassDescriptor desc = new ClassDescriptor();
         desc.clazz = clazz;
         desc.lookup = lookup;
-        desc.fields = getFields(lookup, clazz,  includingPrivate);
-        desc.getters = getGetters(lookup, clazz, includingPrivate);
+        desc.fields = getFields(lookup, clazz, null, includingPrivate);
+        desc.getters = getGetters(lookup, clazz, null,includingPrivate);
         desc.wrappers = new ArrayList<WrapperDescriptor>();
         desc.unWrappers = new ArrayList<Method>(); 
         
@@ -228,31 +228,47 @@ public class JsoniterSpi {
     
     public static ClassDescriptor getEncodingClassDescriptor(Class clazz, Class viewClazz, boolean includingPrivate) {
     	
-    	if(viewClazz == null)
+    	System.out.println("getEncodingClassDescriptor: " + clazz + " view: " + viewClazz);
+//    	if(viewClazz == null)
+//    	{
+//    		return getEncodingClassDescriptor(clazz,includingPrivate);
+//    	}
+    	
+    	Set<Class<?>> parentClasses = new HashSet<Class<?>>();
+    	
+    	if(viewClazz != null)
     	{
-    		return getEncodingClassDescriptor(clazz,includingPrivate);
+	    	Class<?> currentViewClass = viewClazz;
+	    	
+	    	while(!currentViewClass.equals(Object.class))
+	    	{
+	    		parentClasses.add(currentViewClass);
+	    		currentViewClass = currentViewClass.getSuperclass();
+	    	}
     	}
+    	System.out.println("view hierarchy: " + parentClasses );
+    	 
     	
         Map<String, Type> lookup = collectTypeVariableLookup(clazz);
         ClassDescriptor desc = new ClassDescriptor();
         desc.clazz = clazz;
         desc.lookup = lookup;
-        desc.fields = getFields(lookup, clazz,  includingPrivate);
-        desc.getters = getGetters(lookup, clazz, includingPrivate);
+        desc.fields = getFields(lookup, clazz, viewClazz, includingPrivate);
+        desc.getters = getGetters(lookup, clazz, viewClazz, includingPrivate);
         desc.wrappers = new ArrayList<WrapperDescriptor>();
         desc.unWrappers = new ArrayList<Method>();
           
         for (Extension extension : extensions) {
             extension.updateClassDescriptor(desc);
         }
-        
-        
+         
          
         System.out.println( "all bindings before: ");
         desc.fields.stream().forEach( b -> System.out.println(b + " field annotations: " + b.annotations.length));
         desc.getters.stream().forEach( b -> System.out.println(b + " getter annotations: " + b.annotations.length));
 
-        
+        if(parentClasses.size() > 0)
+        {
         desc.allEncoderBindings().stream().filter( b -> {
         	return b.annotations != null && b.annotations.length > 0;
         }).forEach( b -> {
@@ -263,20 +279,29 @@ public class JsoniterSpi {
         	}).flatMap( a -> Arrays.stream(((JsonView) a).value()) )
         	.collect(Collectors.toSet());
         	
-        	
-        	 
-        	if( !viewClasses.contains(viewClazz) && viewClasses.size() > 0 )
+         	 
+        	if(  viewClasses.size() < 1 )
         	{
-        		System.out.println("binding " + b + " is hidden from " + viewClasses);
+        		return;
+        	}
+        	
+        	else if( !viewClasses.stream().anyMatch( v -> parentClasses.contains(v)))
+        	{
+        		System.out.println("binding " + b + " is NOT hidden from " + viewClasses);
 
         		desc.fields.remove(b);
         		desc.getters.remove(b);
-        	} 
+        	}
         	else
         	{
         		System.out.println("binding " + b + " is not filtered by " + viewClasses);
+
         	}
+        
+        	 
+         	
         });
+        }
         
         encodingDeduplicate(desc);
 
@@ -294,6 +319,7 @@ public class JsoniterSpi {
                 binding.method.setAccessible(true);
             }
             if (binding.encoder != null) {
+            	System.out.println("binding.encoder: " + binding.encoder + " " + binding.encoderCacheKey());
                 JsoniterSpi.addNewEncoder(binding.encoderCacheKey(), binding.encoder);
             }
         }
@@ -418,7 +444,7 @@ public class JsoniterSpi {
     }
 
     @SuppressWarnings("unchecked")
-	private static List<Binding> getFields(Map<String, Type> lookup, Class clazz, boolean includingPrivate) {
+	private static List<Binding> getFields(Map<String, Type> lookup, Class clazz, Class viewClazz, boolean includingPrivate) {
         ArrayList<Binding> bindings = new ArrayList<Binding>();
         for (Field field : getAllFields(clazz, includingPrivate)) {
         	
@@ -434,7 +460,7 @@ public class JsoniterSpi {
             if (includingPrivate) {
                 field.setAccessible(true);
             }
-            Binding binding = createBindingFromField(lookup, clazz, field);
+            Binding binding = createBindingFromField(lookup, clazz, viewClazz, field);
             bindings.add(binding);
         }
         return bindings;
@@ -442,9 +468,9 @@ public class JsoniterSpi {
     
   
 
-    private static Binding createBindingFromField(Map<String, Type> lookup, Class clazz, Field field) {
+    private static Binding createBindingFromField(Map<String, Type> lookup, Class clazz,Class viewClazz, Field field) {
         try {
-            Binding binding = new Binding(clazz, lookup, field.getGenericType());
+            Binding binding = new Binding(clazz, lookup, field.getGenericType(), viewClazz);
             binding.fromNames = new String[]{field.getName()};
             binding.name = field.getName();
             binding.annotations = field.getAnnotations();
@@ -470,7 +496,7 @@ public class JsoniterSpi {
         return allFields;
     }
 
-    private static List<Binding> getSetters(Map<String, Type> lookup, Class clazz, boolean includingPrivate) {
+    private static List<Binding> getSetters(Map<String, Type> lookup, Class clazz, Class viewClazz, boolean includingPrivate) {
         ArrayList<Binding> setters = new ArrayList<Binding>();
         for (Method method : getAllMethods(clazz, includingPrivate)) {
             if (Modifier.isStatic(method.getModifiers())) {
@@ -495,7 +521,7 @@ public class JsoniterSpi {
             }
             try {
                 String fromName = translateSetterName(methodName);
-                Binding binding = new Binding(clazz, lookup, paramTypes[0]);
+                Binding binding = new Binding(clazz, lookup, paramTypes[0], viewClazz);
                 binding.fromNames = new String[]{fromName};
                 binding.name = fromName;
                 binding.method = method;
@@ -532,7 +558,7 @@ public class JsoniterSpi {
         return fromName;
     }
 
-    private static List<Binding> getGetters(Map<String, Type> lookup, Class clazz, boolean includingPrivate) {
+    private static List<Binding> getGetters(Map<String, Type> lookup, Class clazz,Class viewClazz, boolean includingPrivate) {
         ArrayList<Binding> getters = new ArrayList<Binding>();
         for (Method method : getAllMethods(clazz, includingPrivate)) {
             if (Modifier.isStatic(method.getModifiers())) {
@@ -555,7 +581,7 @@ public class JsoniterSpi {
             char[] fromNameChars = toName.toCharArray();
             fromNameChars[0] = Character.toLowerCase(fromNameChars[0]);
             toName = new String(fromNameChars);
-            Binding getter = new Binding(clazz, lookup, method.getGenericReturnType());
+            Binding getter = new Binding(clazz, lookup, method.getGenericReturnType(), viewClazz);
             getter.toNames = new String[]{toName};
             getter.name = toName;
             getter.method = method;

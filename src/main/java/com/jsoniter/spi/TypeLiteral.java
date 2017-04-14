@@ -1,12 +1,14 @@
 package com.jsoniter.spi;
 
 import com.jsoniter.any.Any;
+import com.jsoniter.output.JsonContext;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,13 +104,138 @@ public class TypeLiteral<T> {
         } else if (type instanceof ParameterizedType) {
             try {
                 ParameterizedType pType = (ParameterizedType) type;
-                Class clazz = (Class) pType.getRawType();
+                Type rType = pType.getRawType();
+
+            	if(prefix.equals("decoder."))
+            	{
+            		if(rType instanceof ParameterizedTypeImpl)
+                    {
+           			 	ParameterizedTypeImpl pTypeImpl = (ParameterizedTypeImpl)rType;
+           			 	
+           			 	rType = Class.forName(pTypeImpl.getRawTypeName());
+           			 	
+                     }
+            		
+//            		Type[] typeArgs = Arrays.stream(pType.getActualTypeArguments()).toArray(Type[]::new);
+            		
+            		System.out.println("Decoder Type args: " + Arrays.toString(pType.getActualTypeArguments()));
+            		
+	                Class clazz = (Class) rType;
+	                decoderClassName.append(clazz.getCanonicalName().replace("[]", "_array"));
+	                for (int i = 0; i < pType.getActualTypeArguments().length; i++) {
+	                    String typeName = formatTypeWithoutSpecialCharacter(pType.getActualTypeArguments()[i]);
+	                     
+	                    
+	                    System.out.println("decoder class name: " + decoderClassName + " adding " + pType.getActualTypeArguments()[i]);
+	                    	if( pType.getActualTypeArguments()[i] instanceof Class)
+	                    	{	
+	                    		Class<?> decoderArgClass = (Class<?>)pType.getActualTypeArguments()[i];
+	                    		
+	                    		if(((JsonContext.class).isAssignableFrom(decoderArgClass)))
+	                    		{
+	                    			System.out.println("Skipping class " + decoderArgClass);
+	                    			continue;
+	                    		} 
+	                    	} 
+	                    
+	                    decoderClassName.append('_');
+	                    decoderClassName.append(typeName);
+	                }
+            	}
+            	else
+            	{
+             
+               
+                 
+                 Type[] typeArgs = pType.getActualTypeArguments();
+                Type contextType = null;
+                
+              //  System.err.println("pType: " + pType);
+             //   System.err.println("rType: " + rType);
+                
+                for( Type t : typeArgs )
+                {
+                	Class<?> clazz = (Class<?>) t;
+               // 	System.err.println("Type arg " + clazz + " is context: " + ((JsonContext.class).isAssignableFrom(clazz)));
+                	if(((JsonContext.class).isAssignableFrom(clazz)))
+                	{
+                		 contextType = t;
+                	 
+                		 
+                		 break;
+                	}
+                }
+             //   System.err.println("args before: " + Arrays.toString(typeArgs) + " context: " + contextType);
+
+                if(contextType != null)
+                {
+               //     System.err.println("context: " + contextType);
+                    
+                    if(rType instanceof ParameterizedTypeImpl)
+                    {
+           			 	ParameterizedTypeImpl pTypeImpl = (ParameterizedTypeImpl)rType;
+           			 	
+           			 	typeArgs =  pTypeImpl.getActualTypeArguments();
+           			 	
+                     }
+                    
+                    boolean insertType = false;
+                    
+                    for( Type t : typeArgs )
+                    {
+                    	if(t.equals(contextType))
+                    	{
+                    		insertType = false;
+                    	}
+                    }
+                    
+                    
+               		Type[] newArgs = new Type[typeArgs.length+1];
+               		
+               		
+             		System.arraycopy(typeArgs, 0, newArgs, 0, typeArgs.length);
+            		newArgs[typeArgs.length] = pType.getActualTypeArguments()[0];
+            		typeArgs = newArgs; 
+//            		
+//            		 pType = (ParameterizedType) pType.getRawType();
+//            		 rType = pType.getRawType();
+//            		 
+            		//pType = (ParameterizedType) pType.getRawType();
+                }
+                
+               // System.err.println("args after: " + Arrays.toString(typeArgs));
+                /*
+                 * 
+                 		Type[] newArgs = new Type[typeArgs.length+1];
+                		System.arraycopy(typeArgs, 0, newArgs, 0, typeArgs.length);
+                		newArgs[typeArgs.length] = pType.getActualTypeArguments()[0];
+                		pType = (ParameterizedType) pType.getRawType();
+                		break;
+                 */
+                
+                if(rType instanceof ParameterizedTypeImpl)
+                {
+       			 	ParameterizedTypeImpl pTypeImpl = (ParameterizedTypeImpl)rType;
+       			 	
+       			 	rType = Class.forName(pTypeImpl.getRawTypeName());
+       			 	
+                 }
+                
+             //   System.err.println("pType: " + pType);
+             //   System.err.println("rType: " + rType);
+                
+                typeArgs = Arrays.stream(typeArgs).distinct().toArray(Type[]::new);
+                
+                Class clazz = (Class) rType;
                 decoderClassName.append(clazz.getCanonicalName().replace("[]", "_array"));
-                for (int i = 0; i < pType.getActualTypeArguments().length; i++) {
-                    String typeName = formatTypeWithoutSpecialCharacter(pType.getActualTypeArguments()[i]);
+                for (int i = 0; i < typeArgs.length; i++) {
+                    String typeName = formatTypeWithoutSpecialCharacter(typeArgs[i]);
                     decoderClassName.append('_');
                     decoderClassName.append(typeName);
                 }
+                
+                System.err.println(decoderClassName.toString());
+            	}
             } catch (Exception e) {
                 throw new JsonException("failed to generate cache key for: " + type, e);
             }

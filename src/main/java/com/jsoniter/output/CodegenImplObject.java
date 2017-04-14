@@ -8,50 +8,50 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class CodegenImplObject {
-    public static CodegenResult genObject(Class clazz) {
-
-        CodegenResult ctx = new CodegenResult();
-        ClassDescriptor desc = JsoniterSpi.getEncodingClassDescriptor(clazz, false);
-        HashMap<String, Binding> bindings = new HashMap<String, Binding>();
-        for (Binding binding : desc.allEncoderBindings()) {
-            for (String toName : binding.toNames) {
-                bindings.put(toName, binding);
-            }
-        }
-        ArrayList<String> toNames = new ArrayList<String>(bindings.keySet());
-        Collections.sort(toNames, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                int x = CodegenAccess.calcHash(o1);
-                int y = CodegenAccess.calcHash(o2);
-                return (x < y) ? -1 : ((x == y) ? 0 : 1);
-            }
-        });
-        ctx.append(String.format("public static void encode_(%s obj, com.jsoniter.output.JsonStream stream) throws java.io.IOException {", clazz.getCanonicalName()));
-        if (hasFieldOutput(desc)) {
-            int notFirst = 0;
-            ctx.buffer('{');
-            for (String toName : toNames) {
-                notFirst = genField(ctx, bindings.get(toName), toName, notFirst);
-            }
-            for (Method unwrapper : desc.unWrappers) {
-                notFirst = appendComma(ctx, notFirst);
-                ctx.append(String.format("obj.%s(stream);", unwrapper.getName()));
-            }
-            ctx.buffer('}');
-        } else {
-            ctx.buffer("{}");
-        }
-        ctx.append("}");
-        return ctx;
-    }
+//    public static CodegenResult genObject(Class clazz) {
+//
+//        CodegenResult ctx = new CodegenResult();
+//        ClassDescriptor desc = JsoniterSpi.getEncodingClassDescriptor(clazz, false);
+//        HashMap<String, Binding> bindings = new HashMap<String, Binding>();
+//        for (Binding binding : desc.allEncoderBindings()) {
+//            for (String toName : binding.toNames) {
+//                bindings.put(toName, binding);
+//            }
+//        }
+//        ArrayList<String> toNames = new ArrayList<String>(bindings.keySet());
+//        Collections.sort(toNames, new Comparator<String>() {
+//            @Override
+//            public int compare(String o1, String o2) {
+//                int x = CodegenAccess.calcHash(o1);
+//                int y = CodegenAccess.calcHash(o2);
+//                return (x < y) ? -1 : ((x == y) ? 0 : 1);
+//            }
+//        });
+//        ctx.append(String.format("public static void encode_(%s obj, com.jsoniter.output.JsonStream stream) throws java.io.IOException {", clazz.getCanonicalName()));
+//        if (hasFieldOutput(desc)) {
+//            int notFirst = 0;
+//            ctx.buffer('{');
+//            for (String toName : toNames) {
+//                notFirst = genField(ctx, bindings.get(toName), toName, notFirst);
+//            }
+//            for (Method unwrapper : desc.unWrappers) {
+//                notFirst = appendComma(ctx, notFirst);
+//                ctx.append(String.format("obj.%s(stream);", unwrapper.getName()));
+//            }
+//            ctx.buffer('}');
+//        } else {
+//            ctx.buffer("{}");
+//        }
+//        ctx.append("}");
+//        return ctx;
+//    }
     
     public static CodegenResult genObject(Class clazz, Class viewClazz) {
 
-    	if(viewClazz == null)
-    	{
-    		return genObject(clazz);
-    	}
+//    	if(viewClazz == null)
+//    	{
+//    		return genObject(clazz);
+//    	}
     	
         CodegenResult ctx = new CodegenResult();
         ClassDescriptor desc = JsoniterSpi.getEncodingClassDescriptor(clazz,viewClazz, false);
@@ -75,7 +75,7 @@ public class CodegenImplObject {
             int notFirst = 0;
             ctx.buffer('{');
             for (String toName : toNames) {
-                notFirst = genField(ctx, bindings.get(toName), toName, notFirst);
+                notFirst = genField(ctx, bindings.get(toName), toName, viewClazz, notFirst);
             }
             for (Method unwrapper : desc.unWrappers) {
                 notFirst = appendComma(ctx, notFirst);
@@ -102,8 +102,15 @@ public class CodegenImplObject {
         return false;
     }
 
-    private static int genField(CodegenResult ctx, Binding binding, String toName, int notFirst) {
+    private static int genField(CodegenResult ctx, Binding binding, String toName, Class viewClazz, int notFirst) {
+    	
+    	System.out.println("genField: " + binding );
         String fieldCacheKey = binding.encoderCacheKey();
+        
+    	System.out.println("fieldCacheKey: " + fieldCacheKey );
+
+    	
+    	
         Encoder encoder = JsoniterSpi.getEncoder(fieldCacheKey);
         boolean isCollectionValueNullable = binding.isCollectionValueNullable;
         Class valueClazz;

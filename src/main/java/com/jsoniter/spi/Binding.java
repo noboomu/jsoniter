@@ -8,6 +8,7 @@ public class Binding {
     // input
     public final Class clazz;
     public final TypeLiteral clazzTypeLiteral;
+    
     public Annotation[] annotations;
     public Field field; // obj.XXX
     public Method method; // obj.setXXX() or obj.getXXX()
@@ -33,11 +34,31 @@ public class Binding {
     public int idx;
     public long mask;
 
-    public Binding(Class clazz, Map<String, Type> lookup, Type valueType) {
+//    public Binding(Class clazz, Map<String, Type> lookup, Type valueType) {
+//        this.clazz = clazz;
+//        this.clazzTypeLiteral = TypeLiteral.create(clazz);
+//        this.valueType = substituteTypeVariables(lookup, valueType);
+//        this.valueTypeLiteral = TypeLiteral.create(this.valueType);
+//    }
+    
+    public Binding(Class clazz, Map<String, Type> lookup, Type valueType, Class viewClazz) {
+    	
+    	 
+    	
         this.clazz = clazz;
-        this.clazzTypeLiteral = TypeLiteral.create(clazz);
-        this.valueType = substituteTypeVariables(lookup, valueType);
-        this.valueTypeLiteral = TypeLiteral.create(this.valueType);
+        this.clazzTypeLiteral = TypeLiteral.create(clazz,viewClazz);
+        
+        if( valueType.getTypeName().contains("java.lang"))
+    	{
+    		viewClazz = null;
+    	}
+        
+        this.valueType = substituteTypeVariables(lookup, valueType, viewClazz);
+//	    if(this.valueType instanceof ParameterizedType)
+//	    {
+//	    	this.valueType = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
+//	    }
+        this.valueTypeLiteral = TypeLiteral.create(this.valueType,viewClazz);
     }
 
     public String decoderCacheKey() {
@@ -48,7 +69,7 @@ public class Binding {
         return this.name + "@" + this.clazzTypeLiteral.getEncoderCacheKey();
     }
 
-    private static Type substituteTypeVariables(Map<String, Type> lookup, Type type) {
+    private static Type substituteTypeVariables(Map<String, Type> lookup, Type type, Class viewClazz) {
         if (type instanceof TypeVariable) {
             return translateTypeVariable(lookup, (TypeVariable) type);
         }
@@ -56,13 +77,22 @@ public class Binding {
             ParameterizedType pType = (ParameterizedType) type;
             Type[] args = pType.getActualTypeArguments();
             for (int i = 0; i < args.length; i++) {
-                args[i] = substituteTypeVariables(lookup, args[i]);
+            	 System.err.println("before: " + args[0]);
+                args[i] = substituteTypeVariables(lookup, args[i],viewClazz );
+                
+            //    args[i] = new ParameterizedTypeImpl(new Type[]{   args[i]},null, viewClazz);
+           	 System.err.println("after: " + args[0]);
+
             }
+            
+            System.err.println(args[0] + " " + pType.getOwnerType() + " " + pType.getRawType());
+            
+            
             return new ParameterizedTypeImpl(args, pType.getOwnerType(), pType.getRawType());
         }
         if (type instanceof GenericArrayType) {
             GenericArrayType gaType = (GenericArrayType) type;
-            return new GenericArrayTypeImpl(substituteTypeVariables(lookup, gaType.getGenericComponentType()));
+            return new GenericArrayTypeImpl(substituteTypeVariables(lookup, gaType.getGenericComponentType(),viewClazz));
         }
         return type;
     }
@@ -122,6 +152,9 @@ public class Binding {
                 "clazz=" + clazz +
                 ", name='" + name + '\'' +
                 ", valueType=" + valueType +
+                ", class=" + clazz +
+                ", classLiteral=" + clazzTypeLiteral +
+                ", valueTypeLiteral=" + valueTypeLiteral +
                 '}';
     }
 }

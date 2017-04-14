@@ -108,7 +108,7 @@ class Codegen {
         return generatedClassNames.contains(cacheKey);
     }
 
-    private static Type chooseImpl(Type type, Class viewClass) {
+    private static Type chooseImpl(Type type, Class viewClazz) {
         Type[] typeArgs = new Type[0];
         Class clazz;
         if (type instanceof ParameterizedType) {
@@ -118,7 +118,7 @@ class Codegen {
         } else {
             clazz = (Class) type;
         }
-        Class implClazz = JsoniterSpi.getTypeViewImplementation(clazz,viewClass);
+        Class implClazz = JsoniterSpi.getTypeViewImplementation(clazz,viewClazz);
         System.out.println("implClazz: " + implClazz);
         if (Collection.class.isAssignableFrom(clazz)) {
             Type compType = Object.class;

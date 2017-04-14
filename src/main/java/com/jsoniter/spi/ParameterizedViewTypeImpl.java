@@ -4,12 +4,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-public class ParameterizedTypeImpl implements ParameterizedType {
+public class ParameterizedViewTypeImpl implements ParameterizedType {
     private final Type[] actualTypeArguments;
     private final Type   ownerType;
     private final Type   rawType;
 
-    public ParameterizedTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType){
+    public ParameterizedViewTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType){
         this.actualTypeArguments = actualTypeArguments;
         this.ownerType = ownerType;
         this.rawType = rawType;
@@ -26,23 +26,13 @@ public class ParameterizedTypeImpl implements ParameterizedType {
     public Type getRawType() {
         return rawType;
     }
-    
-    public String getRawTypeName()
-    {
-    	 String rawTypeName = rawType.toString();
-         if (rawType instanceof Class) {
-             Class clazz = (Class) rawType;
-             rawTypeName = clazz.getName();
-         }
-         return rawTypeName;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ParameterizedTypeImpl that = (ParameterizedTypeImpl) o;
+        ParameterizedViewTypeImpl that = (ParameterizedViewTypeImpl) o;
 
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         if (!Arrays.equals(actualTypeArguments, that.actualTypeArguments)) return false;
@@ -90,7 +80,7 @@ public class ParameterizedTypeImpl implements ParameterizedType {
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
-            return new ParameterizedTypeImpl(pType.getActualTypeArguments(), pType.getOwnerType(), clazz);
+            return new ParameterizedViewTypeImpl(pType.getActualTypeArguments(), pType.getOwnerType(), clazz);
         }
         throw new JsonException("can not change impl for: " + type);
     }

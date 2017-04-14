@@ -29,13 +29,13 @@ public class JsoniterAnnotationSupport extends EmptyExtension {
                 desc.asExtraForUnknownProperties = true;
             }
             for (String fieldName : jsonObject.unknownPropertiesWhitelist()) {
-                Binding binding = new Binding(desc.clazz, desc.lookup, Object.class);
+                Binding binding = new Binding(desc.clazz, desc.lookup, Object.class,null);
                 binding.name = fieldName;
                 binding.shouldSkip = true;
                 desc.fields.add(binding);
             }
             for (String fieldName : jsonObject.unknownPropertiesBlacklist()) {
-                Binding binding = new Binding(desc.clazz, desc.lookup, Object.class);
+                Binding binding = new Binding(desc.clazz, desc.lookup, Object.class,null);
                 binding.name = fieldName;
                 binding.asExtraWhenPresent = true;
                 desc.fields.add(binding);
@@ -80,7 +80,7 @@ public class JsoniterAnnotationSupport extends EmptyExtension {
             setter.method = method;
             for (int i = 0; i < annotations.length; i++) {
                 Annotation[] paramAnnotations = annotations[i];
-                Binding binding = new Binding(desc.clazz, desc.lookup, method.getGenericParameterTypes()[i]);
+                Binding binding = new Binding(desc.clazz, desc.lookup, method.getGenericParameterTypes()[i],null);
                 JsonProperty jsonProperty = getJsonProperty(paramAnnotations);
                 if (jsonProperty != null) {
                     updateBindingWithJsonProperty(binding, jsonProperty);
@@ -129,7 +129,7 @@ public class JsoniterAnnotationSupport extends EmptyExtension {
             for (int i = 0; i < annotations.length; i++) {
                 Annotation[] paramAnnotations = annotations[i];
                 JsonProperty jsonProperty = getJsonProperty(paramAnnotations);
-                Binding binding = new Binding(desc.clazz, desc.lookup, method.getGenericParameterTypes()[i]);
+                Binding binding = new Binding(desc.clazz, desc.lookup, method.getGenericParameterTypes()[i],null);
                 if (jsonProperty != null) {
                     updateBindingWithJsonProperty(binding, jsonProperty);
                 }
@@ -156,7 +156,7 @@ public class JsoniterAnnotationSupport extends EmptyExtension {
             for (int i = 0; i < annotations.length; i++) {
                 Annotation[] paramAnnotations = annotations[i];
                 JsonProperty jsonProperty = getJsonProperty(paramAnnotations);
-                Binding binding = new Binding(desc.clazz, desc.lookup, ctor.getGenericParameterTypes()[i]);
+                Binding binding = new Binding(desc.clazz, desc.lookup, ctor.getGenericParameterTypes()[i],null);
                 if (jsonProperty != null) {
                     updateBindingWithJsonProperty(binding, jsonProperty);
                 }

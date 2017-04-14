@@ -374,6 +374,20 @@ public class JsonStream extends OutputStream {
             throw new JsonException(e);
         }
     }
+    
+    public static void serialize(Object obj, Class viewClazz, OutputStream out) {
+        JsonStream stream = tlsStream.get();
+        try {
+            try {
+                stream.reset(out);
+                stream.writeViewVal(obj,viewClazz);
+            } finally {
+                stream.close();
+            }
+        } catch (IOException e) {
+            throw new JsonException(e);
+        }
+    }
 
     private final static ThreadLocal<AsciiOutputStream> tlsAsciiOutputStream = new ThreadLocal<AsciiOutputStream>() {
         @Override
@@ -381,6 +395,13 @@ public class JsonStream extends OutputStream {
             return new AsciiOutputStream();
         }
     };
+    
+    public static String serialize(Object obj,Class viewClazz) {
+        AsciiOutputStream asciiOutputStream = tlsAsciiOutputStream.get();
+        asciiOutputStream.reset();
+        serialize(obj, viewClazz, asciiOutputStream);
+        return asciiOutputStream.toString();
+    }
 
     public static String serialize(Object obj) {
         AsciiOutputStream asciiOutputStream = tlsAsciiOutputStream.get();

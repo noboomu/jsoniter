@@ -5,8 +5,11 @@ import java.util.*;
 
 public class CodegenImplArray {
 
-    public static CodegenResult genArray(String cacheKey, Class clazz) {
+    public static CodegenResult genArray(String cacheKey, Class clazz, Class viewClazz) {
         Class compType = clazz.getComponentType();
+        
+        System.out.println("genArray: " + clazz + " view: " + viewClazz + " cacheKey: " + cacheKey + " compType: " + compType);
+        
         if (compType.isArray()) {
             throw new IllegalArgumentException("nested array not supported: " + clazz.getCanonicalName());
         }
@@ -26,20 +29,20 @@ public class CodegenImplArray {
         ctx.append(String.format("%s e = arr[i++];", compType.getCanonicalName()));
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "e", compType, true);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "e", compType, false);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, false);
         }
         ctx.append("while (i < arr.length) {");
         ctx.append("stream.write(',');");
         ctx.append("e = arr[i++];");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "e", compType, true);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "e", compType, false);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, false);
         }
         ctx.append("}");
         ctx.buffer(']');
@@ -47,8 +50,13 @@ public class CodegenImplArray {
         return ctx;
     }
 
-    public static CodegenResult genCollection(String cacheKey, Class clazz, Type[] typeArgs) {
+    public static CodegenResult genCollection(String cacheKey, Class clazz, Class viewClazz, Type[] typeArgs) {
+    	
+    	
         Type compType = Object.class;
+        
+        System.out.println("genCollection: " + clazz + " view: " + viewClazz + " cacheKey: " + cacheKey + " compType: " + compType);
+
         if (typeArgs.length == 0) {
             // default to List<Object>
         } else if (typeArgs.length == 1) {
@@ -64,13 +72,13 @@ public class CodegenImplArray {
             clazz = HashSet.class;
         }
         if (List.class.isAssignableFrom(clazz)) {
-            return genList(cacheKey, clazz, compType);
+            return genList(cacheKey, clazz, viewClazz, compType);
         } else {
-            return genCollection(cacheKey, clazz, compType);
+            return genCollection(cacheKey, clazz, viewClazz, compType);
         }
     }
 
-    private static CodegenResult genList(String cacheKey, Class clazz, Type compType) {
+    private static CodegenResult genList(String cacheKey, Class clazz, Class viewClazz, Type compType) {
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;
@@ -84,20 +92,20 @@ public class CodegenImplArray {
         ctx.append("java.lang.Object e = list.get(0);");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "e", compType, true);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,  viewClazz, true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "e", compType, false);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,   viewClazz,false);
         }
         ctx.append("for (int i = 1; i < size; i++) {");
         ctx.append("stream.write(',');");
         ctx.append("e = list.get(i);");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "e", compType, true);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,  viewClazz, true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "e", compType, false);
+            CodegenImplNative.genWriteOp(ctx, "e", compType, viewClazz, false);
         }
         ctx.append("}");
         ctx.buffer(']');
@@ -105,7 +113,7 @@ public class CodegenImplArray {
         return ctx;
     }
 
-    private static CodegenResult genCollection(String cacheKey, Class clazz, Type compType) {
+    private static CodegenResult genCollection(String cacheKey, Class clazz,Class viewClazz, Type compType) {
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;
@@ -118,20 +126,20 @@ public class CodegenImplArray {
         ctx.append("java.lang.Object e = iter.next();");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "e", compType, true);
+            CodegenImplNative.genWriteOp(ctx, "e", compType, viewClazz,true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "e", compType, false);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, false);
         }
         ctx.append("while (iter.hasNext()) {");
         ctx.append("stream.write(',');");
         ctx.append("e = iter.next();");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "e", compType, true);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "e", compType, false);
+            CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, false);
         }
         ctx.append("}");
         ctx.buffer(']');

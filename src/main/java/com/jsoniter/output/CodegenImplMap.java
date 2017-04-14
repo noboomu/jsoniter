@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 
 public class CodegenImplMap {
-    public static CodegenResult genMap(String cacheKey, Class clazz, Type[] typeArgs) {
+    public static CodegenResult genMap(String cacheKey, Class clazz,Class viewClazz, Type[] typeArgs) {
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;
@@ -36,10 +36,10 @@ public class CodegenImplMap {
         ctx.buffer(':');
         if (isCollectionValueNullable) {
             ctx.append("if (entry.getValue() == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType, true);
+            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType,viewClazz, true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType, false);
+            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType,viewClazz, false);
         }
         ctx.append("while(iter.hasNext()) {");
         ctx.append("entry = (java.util.Map.Entry)iter.next();");
@@ -47,10 +47,10 @@ public class CodegenImplMap {
         ctx.append("stream.writeObjectField((String)entry.getKey());");
         if (isCollectionValueNullable) {
             ctx.append("if (entry.getValue() == null) { stream.writeNull(); } else {");
-            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType, true);
+            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType,viewClazz, true);
             ctx.append("}");
         } else {
-            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType, false);
+            CodegenImplNative.genWriteOp(ctx, "entry.getValue()", valueType,viewClazz, false);
         }
         ctx.append("}");
         ctx.buffer('}');
