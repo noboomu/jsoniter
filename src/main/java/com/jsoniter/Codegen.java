@@ -1,5 +1,6 @@
 package com.jsoniter;
 
+import com.jsoniter.output.JsonContext;
 import com.jsoniter.spi.*;
 
 import java.io.File;
@@ -27,7 +28,7 @@ class Codegen {
         Codegen.mode = mode;
     }
 
-    static Decoder getDecoder(String cacheKey, Type type, Class viewClass) {
+    static Decoder getDecoder(String cacheKey, Type type, Class<? extends JsonContext> viewClass) {
         Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
         if (decoder != null) {
             return decoder;
@@ -35,7 +36,7 @@ class Codegen {
         return gen(cacheKey, type, viewClass);
     }
 
-    private synchronized static Decoder gen(String cacheKey, Type type, Class viewClass) {
+    private synchronized static Decoder gen(String cacheKey, Type type, Class<? extends JsonContext> viewClass) {
         Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
         if (decoder != null) {
             return decoder;
@@ -108,7 +109,7 @@ class Codegen {
         return generatedClassNames.contains(cacheKey);
     }
 
-    private static Type chooseImpl(Type type, Class viewClazz) {
+    private static Type chooseImpl(Type type, Class<? extends JsonContext> viewClazz) {
         Type[] typeArgs = new Type[0];
         Class clazz;
         if (type instanceof ParameterizedType) {
@@ -118,7 +119,7 @@ class Codegen {
         } else {
             clazz = (Class) type;
         }
-        Class implClazz = JsoniterSpi.getTypeViewImplementation(clazz,viewClazz);
+        Class implClazz = JsoniterSpi.getTypeImplementation(clazz);
         System.out.println("implClazz: " + implClazz);
         if (Collection.class.isAssignableFrom(clazz)) {
             Type compType = Object.class;

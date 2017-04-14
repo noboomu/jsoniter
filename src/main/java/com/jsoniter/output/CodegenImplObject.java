@@ -1,11 +1,18 @@
 package com.jsoniter.output;
 
-import com.jsoniter.*;
-import com.jsoniter.CodegenAccess;
-import com.jsoniter.spi.*;
-
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.jsoniter.CodegenAccess;
+import com.jsoniter.spi.Binding;
+import com.jsoniter.spi.ClassDescriptor;
+import com.jsoniter.spi.Encoder;
+import com.jsoniter.spi.JsoniterSpi;
 
 public class CodegenImplObject {
 //    public static CodegenResult genObject(Class clazz) {
@@ -46,13 +53,8 @@ public class CodegenImplObject {
 //        return ctx;
 //    }
     
-    public static CodegenResult genObject(Class clazz, Class viewClazz) {
-
-//    	if(viewClazz == null)
-//    	{
-//    		return genObject(clazz);
-//    	}
-    	
+    public static CodegenResult genObject(Class clazz, Class<? extends JsonContext>  viewClazz) {
+ 
         CodegenResult ctx = new CodegenResult();
         ClassDescriptor desc = JsoniterSpi.getEncodingClassDescriptor(clazz,viewClazz, false);
         HashMap<String, Binding> bindings = new HashMap<String, Binding>();
@@ -62,14 +64,16 @@ public class CodegenImplObject {
             }
         }
         ArrayList<String> toNames = new ArrayList<String>(bindings.keySet());
+         
+
         Collections.sort(toNames, new Comparator<String>() {
             @Override
-            public int compare(String o1, String o2) {
-                int x = CodegenAccess.calcHash(o1);
-                int y = CodegenAccess.calcHash(o2);
-                return (x < y) ? -1 : ((x == y) ? 0 : 1);
+            public int compare(String o1, String o2) { 
+            	return bindings.get(o1).compareTo(bindings.get(o2));
             }
         });
+         
+        
         ctx.append(String.format("public static void encode_(%s obj,  com.jsoniter.output.JsonStream stream) throws java.io.IOException {", clazz.getCanonicalName()));
         if (hasFieldOutput(desc)) {
             int notFirst = 0;
@@ -102,15 +106,10 @@ public class CodegenImplObject {
         return false;
     }
 
-    private static int genField(CodegenResult ctx, Binding binding, String toName, Class viewClazz, int notFirst) {
+    private static int genField(CodegenResult ctx, Binding binding, String toName, Class<? extends JsonContext> viewClazz, int notFirst) {
     	
-    	System.out.println("genField: " + binding );
-        String fieldCacheKey = binding.encoderCacheKey();
-        
-    	System.out.println("fieldCacheKey: " + fieldCacheKey );
-
-    	
-    	
+         String fieldCacheKey = binding.encoderCacheKey();
+         
         Encoder encoder = JsoniterSpi.getEncoder(fieldCacheKey);
         boolean isCollectionValueNullable = binding.isCollectionValueNullable;
         Class valueClazz;

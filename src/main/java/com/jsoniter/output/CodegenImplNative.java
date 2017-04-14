@@ -264,16 +264,14 @@ public class CodegenImplNative {
         });
     }};
 
-    public static void genWriteOp(CodegenResult ctx, String code, Type valueType,  Class viewClazz,boolean isNullable) {
+    public static void genWriteOp(CodegenResult ctx, String code, Type valueType,  Class<? extends JsonContext> viewClazz,boolean isNullable) {
         genWriteOp(ctx, code, valueType,viewClazz,  isNullable, true);
     }
 
-    public static void genWriteOp(CodegenResult ctx, String code, Type valueType, Class viewClazz, boolean isNullable, boolean isCollectionValueNullable) {
-    	
-    	System.out.println("genWriteOp");
-	final Type type = valueType;
-    	
-    
+    public static void genWriteOp(CodegenResult ctx, String code, Type valueType, Class<? extends JsonContext> viewClazz, boolean isNullable, boolean isCollectionValueNullable) {
+    	 
+    	final Type type = valueType;
+    	 
         String cacheKey = TypeLiteral.create(type,viewClazz).getEncoderCacheKey();
         if (JsoniterSpi.getEncoder(cacheKey) == null) {
             if (!isNullable && String.class == type) {
@@ -291,9 +289,7 @@ public class CodegenImplNative {
         if (!isCollectionValueNullable) {
             cacheKey = cacheKey + "__value_not_nullable";
         }
-//        if (viewClass != null) {
-//            cacheKey = cacheKey + "__" + viewClass.getSimpleName()+"View";
-//        }
+
         Codegen.getEncoder(cacheKey, type,viewClazz);
         CodegenResult generatedSource = Codegen.getGeneratedSource(cacheKey);
         if (generatedSource != null) {

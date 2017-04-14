@@ -5,7 +5,9 @@ import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Map;
 
-public class Binding {
+import com.jsoniter.output.JsonContext;
+
+public class Binding implements Comparable<Binding> {
     // input
     public final Class clazz;
     public final TypeLiteral clazzTypeLiteral;
@@ -32,7 +34,7 @@ public class Binding {
     // but we do not want to bind it anywhere
     public boolean shouldSkip;
     // attachment, used when generating code or reflection
-    public int idx;
+    public int idx = -1;
     public long mask;
 
 //    public Binding(Class clazz, Map<String, Type> lookup, Type valueType) {
@@ -42,10 +44,8 @@ public class Binding {
 //        this.valueTypeLiteral = TypeLiteral.create(this.valueType);
 //    }
     
-    public Binding(Class clazz, Map<String, Type> lookup, Type valueType, Class viewClazz) {
-    	
+    public Binding(Class clazz, Map<String, Type> lookup, Type valueType, Class<? extends JsonContext> viewClazz) {
     	 
-    	System.out.println("Making binding for " + clazz + "\nlookup: " + lookup + "\nvalueType: " + valueType + "\nview: " + viewClazz);
         this.clazz = clazz;
         this.clazzTypeLiteral = TypeLiteral.create(clazz,viewClazz);
         
@@ -55,10 +55,7 @@ public class Binding {
     	}
         
         this.valueType = substituteTypeVariables(lookup, valueType, viewClazz);
-//	    if(this.valueType instanceof ParameterizedType)
-//	    {
-//	    	this.valueType = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
-//	    }
+
         this.valueTypeLiteral = TypeLiteral.create(this.valueType,viewClazz);
     }
 
@@ -70,27 +67,18 @@ public class Binding {
         return this.name + "@" + this.clazzTypeLiteral.getEncoderCacheKey();
     }
 
-    private static Type substituteTypeVariables(Map<String, Type> lookup, Type type, Class viewClazz) {
+    private static Type substituteTypeVariables(Map<String, Type> lookup, Type type, Class<? extends JsonContext> viewClazz) {
         if (type instanceof TypeVariable) {
             return translateTypeVariable(lookup, (TypeVariable) type);
         }
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
             Type[] args = pType.getActualTypeArguments();
-            
-            System.err.println("pType: " + pType.getTypeName() + "\nargs before: " +  Arrays.toString(args));
-
+ 
             for (int i = 0; i < args.length; i++) {
-                 args[i] = substituteTypeVariables(lookup, args[i],null );
-                
-            //    args[i] = new ParameterizedTypeImpl(new Type[]{   args[i]},null, viewClazz);
-                 System.err.println("pType: " + pType.getTypeName() + "\nargs after: " +  Arrays.toString(args));
-
+                 args[i] = substituteTypeVariables(lookup, args[i],null ); 
             }
-            
-            System.err.println("args: " + Arrays.toString(args) + " owner: " + pType.getOwnerType() + " raw: " + pType.getRawType());
-            
-            
+             
             return new ParameterizedTypeImpl(args, pType.getOwnerType(), pType.getRawType());
         }
         if (type instanceof GenericArrayType) {
@@ -160,4 +148,13 @@ public class Binding {
                 ", valueTypeLiteral=" + valueTypeLiteral +
                 '}';
     }
+
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(Binding o)
+	{
+		return Integer.compare(this.idx, o.idx);
+	}
 }

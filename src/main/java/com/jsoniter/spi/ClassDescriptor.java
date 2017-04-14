@@ -3,6 +3,7 @@ package com.jsoniter.spi;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,7 @@ public class ClassDescriptor {
         ArrayList<Binding> bindings = new ArrayList<Binding>(8);
         bindings.addAll(fields);
         bindings.addAll(getters);
+        Collections.sort(bindings);
         return bindings;
     }
 }

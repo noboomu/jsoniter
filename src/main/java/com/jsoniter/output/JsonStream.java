@@ -336,7 +336,7 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public final void writeViewVal(Object obj, Class viewClass) throws IOException {
+    public final void writeViewVal(Object obj, Class<? extends JsonContext> viewClass) throws IOException {
         if (obj == null) {
             writeNull();
             return;
@@ -346,7 +346,7 @@ public class JsonStream extends OutputStream {
          Codegen.getEncoder(cacheKey, clazz,viewClass).encode(obj, this);
     }
 
-    public final <T> void writeViewVal(TypeLiteral<T> typeLiteral, T obj, Class viewClass) throws IOException {
+    public final <T> void writeViewVal(TypeLiteral<T> typeLiteral, T obj, Class<? extends JsonContext> viewClass) throws IOException {
         if (null == obj) {
             writeNull();
         } else {
@@ -375,7 +375,7 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public static void serialize(Object obj, Class viewClazz, OutputStream out) {
+    public static void serialize(Object obj, Class<? extends JsonContext> viewClazz, OutputStream out) {
         JsonStream stream = tlsStream.get();
         try {
             try {
@@ -396,7 +396,7 @@ public class JsonStream extends OutputStream {
         }
     };
     
-    public static String serialize(Object obj,Class viewClazz) {
+    public static String serialize(Object obj,Class<? extends JsonContext> viewClazz) {
         AsciiOutputStream asciiOutputStream = tlsAsciiOutputStream.get();
         asciiOutputStream.reset();
         serialize(obj, viewClazz, asciiOutputStream);

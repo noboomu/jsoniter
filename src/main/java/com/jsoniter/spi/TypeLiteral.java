@@ -115,19 +115,13 @@ public class TypeLiteral<T> {
            			 	rType = Class.forName(pTypeImpl.getRawTypeName());
            			 	
                      }
-            		
-//            		Type[] typeArgs = Arrays.stream(pType.getActualTypeArguments()).toArray(Type[]::new);
-            		
-            	//	System.out.println("Decoder Type args: " + Arrays.toString(pType.getActualTypeArguments()));
-            		
+            		 
 	                Class clazz = (Class) rType;
 	                decoderClassName.append(clazz.getCanonicalName().replace("[]", "_array"));
 	                for (int i = 0; i < pType.getActualTypeArguments().length; i++) {
 	                    String typeName = formatTypeWithoutSpecialCharacter(pType.getActualTypeArguments()[i]);
-	                     
-	                    
-	                   // System.out.println("decoder class name: " + decoderClassName + " adding " + pType.getActualTypeArguments()[i]);
-	                    	if( pType.getActualTypeArguments()[i] instanceof Class)
+	                      
+ 	                    	if( pType.getActualTypeArguments()[i] instanceof Class)
 	                    	{	
 	                    		Class<?> decoderArgClass = (Class<?>)pType.getActualTypeArguments()[i];
 	                    		
@@ -144,97 +138,45 @@ public class TypeLiteral<T> {
             	}
             	else
             	{
-             
-               
-                 
-                 Type[] typeArgs = pType.getActualTypeArguments();
+              
+                Type[] typeArgs = pType.getActualTypeArguments();
                 Type contextType = null;
-                
-              //  System.err.println("pType: " + pType);
-             //   System.err.println("rType: " + rType);
-                
+              
                 for( Type t : typeArgs )
                 {
-                	System.err.println(type + "\n\tencoder type arg: " + t);
-                	if( t instanceof Class)
-                	{
-                    	System.err.println(type + "\n\tencoder type arg is class");
-
+                 	if( t instanceof Class)
+                	{ 
                 		Class<?> clazz = (Class<?>) t;
                 		if(((JsonContext.class).isAssignableFrom(clazz)))
                     	{
                     		 contextType = t; 
                     		 break;
                     	}
-                	}
-                	 
-               // 	System.err.println("Type arg " + clazz + " is context: " + ((JsonContext.class).isAssignableFrom(clazz)));
-                	 
+                	} 
                 }
-                System.err.println(type + "\n\targs before: " + Arrays.toString(typeArgs) + " context: " + contextType);
-                System.err.println("pType: " + pType);
-                System.err.println("rType: " + rType);
+            
                 if(contextType != null)
-                {
-               //     System.err.println("context: " + contextType);
-                    
+                { 
                     if(rType instanceof ParameterizedTypeImpl)
                     {
            			 	ParameterizedTypeImpl pTypeImpl = (ParameterizedTypeImpl)rType;
            			 	
-           			 	typeArgs =  pTypeImpl.getActualTypeArguments();
-           			 	
+           			 	typeArgs =  pTypeImpl.getActualTypeArguments(); 
                      }
-                    
-                    boolean insertType = false;
-                    
-                    for( Type t : typeArgs )
-                    {
-                    	if(t.equals(contextType))
-                    	{
-                    		insertType = false;
-                    	}
-                    }
-                    
-                    
-               		Type[] newArgs = new Type[typeArgs.length+1];
-               		
-               		
-               		
+                      
+               		Type[] newArgs = new Type[typeArgs.length+1]; 
              		System.arraycopy(typeArgs, 0, newArgs, 0, typeArgs.length);
             		newArgs[typeArgs.length] = pType.getActualTypeArguments()[0];
-            		typeArgs = newArgs; 
-//            		
-//            		 pType = (ParameterizedType) pType.getRawType();
-//            		 rType = pType.getRawType();
-//            		 
-            		//pType = (ParameterizedType) pType.getRawType();
+            		typeArgs = newArgs;  
                 }
-                
-                 System.err.println(type + "\n\targs after: " + Arrays.toString(typeArgs));
-                 
-                 System.err.println("pType: " + pType);
-                 System.err.println("rType: " + rType);
-                /*
-                 * 
-                 		Type[] newArgs = new Type[typeArgs.length+1];
-                		System.arraycopy(typeArgs, 0, newArgs, 0, typeArgs.length);
-                		newArgs[typeArgs.length] = pType.getActualTypeArguments()[0];
-                		pType = (ParameterizedType) pType.getRawType();
-                		break;
-                 */
                 
                 if(rType instanceof ParameterizedTypeImpl)
                 {
        			 	ParameterizedTypeImpl pTypeImpl = (ParameterizedTypeImpl)rType;
        			 	
-       			 	rType = Class.forName(pTypeImpl.getRawTypeName());
-       			 	
+       			 	rType = Class.forName(pTypeImpl.getRawTypeName()); 
                  }
-                
-           System.err.println("pType: " + pType);
-         System.err.println("rType: " + rType);
-                
+           
                 typeArgs = Arrays.stream(typeArgs).distinct().toArray(Type[]::new);
                 
                 Class clazz = (Class) rType;
@@ -245,8 +187,7 @@ public class TypeLiteral<T> {
                     decoderClassName.append(typeName);
                 }
                 
-                System.err.println(decoderClassName.toString());
-            	}
+             	}
             } catch (Exception e) {
                 throw new JsonException("failed to generate cache key for: " + type, e);
             }
@@ -260,11 +201,7 @@ public class TypeLiteral<T> {
          
             throw new UnsupportedOperationException("do not know how to handle: " + type);
         }
-        
-//        if(viewClazz != null)
-//        {
-//        	decoderClassName.append("_"+viewClazz.getSimpleName() + "View");
-//        }
+         
         return decoderClassName.toString().replace("$", "_");
     }
 
@@ -298,7 +235,7 @@ public class TypeLiteral<T> {
         return parameterized.getActualTypeArguments()[0];
     }
 
-    public static TypeLiteral create(Type valueType, Class viewClazz) {
+    public static TypeLiteral create(Type valueType, Class<? extends JsonContext> viewClazz) {
     	
     	final Type type;
     	
@@ -319,10 +256,7 @@ public class TypeLiteral<T> {
     	{
     		type = valueType;
     	}
-    	
-    	System.out.println("\nCreating literal for " + type + " typeName: " + type.getTypeName() + " with view " + viewClazz);
-
- 
+    	 
         TypeLiteral typeLiteral = typeLiteralCache.get(type);
         if (typeLiteral != null) {
             return typeLiteral;
@@ -344,11 +278,10 @@ public class TypeLiteral<T> {
      
 
 
-    private synchronized static TypeLiteral createNew(Type valueType, Class viewClazz) {
-    	
-    	System.out.println("\nCreating literal for " + valueType + " typeName: " + valueType.getTypeName() + " with view " + viewClazz);
-
+    private synchronized static TypeLiteral createNew(Type valueType, Class<? extends JsonContext> viewClazz) {
+    	 
     	final Type type;
+    	
     	if(viewClazz != null)
     	{
             type = new ParameterizedTypeImpl(new Type[]{viewClazz},null, valueType);

@@ -5,7 +5,7 @@ import java.util.*;
 
 public class CodegenImplArray {
 
-    public static CodegenResult genArray(String cacheKey, Class clazz, Class viewClazz) {
+    public static CodegenResult genArray(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz) {
         Class compType = clazz.getComponentType();
         
         System.out.println("genArray: " + clazz + " view: " + viewClazz + " cacheKey: " + cacheKey + " compType: " + compType);
@@ -50,13 +50,11 @@ public class CodegenImplArray {
         return ctx;
     }
 
-    public static CodegenResult genCollection(String cacheKey, Class clazz, Class viewClazz, Type[] typeArgs) {
+    public static CodegenResult genCollection(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz, Type[] typeArgs) {
     	
     	
         Type compType = Object.class;
-        
-        System.out.println("genCollection: " + clazz + " view: " + viewClazz + " cacheKey: " + cacheKey + " compType: " + compType);
-
+         
         if (typeArgs.length == 0) {
             // default to List<Object>
         } else if (typeArgs.length == 1) {
@@ -78,7 +76,7 @@ public class CodegenImplArray {
         }
     }
 
-    private static CodegenResult genList(String cacheKey, Class clazz, Class viewClazz, Type compType) {
+    private static CodegenResult genList(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz, Type compType) {
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;
@@ -113,7 +111,7 @@ public class CodegenImplArray {
         return ctx;
     }
 
-    private static CodegenResult genCollection(String cacheKey, Class clazz,Class viewClazz, Type compType) {
+    private static CodegenResult genCollection(String cacheKey, Class clazz,Class<? extends JsonContext> viewClazz, Type compType) {
 
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {

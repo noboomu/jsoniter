@@ -34,10 +34,8 @@ class DynamicCodegen {
         return (Encoder) ctClass.toClass().newInstance();
     }
     
-    public static Encoder gen(Class clazz, Class viewClazz, String cacheKey, CodegenResult source) throws Exception {
-    	
-    	System.out.println("Making encoder for class: " + clazz + " viewClazz: " + viewClazz + "\ncacheKey: " + cacheKey + "\nsource: " + source);
-    	
+    public static Encoder gen(Class clazz, Class<? extends JsonContext> viewClazz, String cacheKey, CodegenResult source) throws Exception {
+     
     	if(viewClazz == null)
     	{
     		return gen(clazz,cacheKey,source);
@@ -57,8 +55,7 @@ class DynamicCodegen {
             System.out.println(wrapperCode);
             System.out.println(staticCode);
         }
-        
-        System.out.println("\n\nCompiling:\n" + wrapperCode + "\n\nforClass: " + ctClass);
+         
         CtMethod interfaceMethod = CtNewMethod.make(wrapperCode, ctClass);
         ctClass.addMethod(interfaceMethod);
         return (Encoder) ctClass.toClass().newInstance();
