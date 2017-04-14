@@ -79,7 +79,7 @@ class ReflectionObjectDecoder {
             binding.decoder = JsoniterSpi.getDecoder(binding.decoderCacheKey());
         }
         if (binding.decoder == null) {
-            binding.decoder = Codegen.getDecoder(binding.valueTypeLiteral.getDecoderCacheKey(), binding.valueType);
+            binding.decoder = Codegen.getDecoder(binding.valueTypeLiteral.getDecoderCacheKey(), binding.valueType, null);
         }
         binding.idx = tempIdx;
         for (String fromName : binding.fromNames) {

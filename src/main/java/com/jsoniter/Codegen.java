@@ -27,15 +27,15 @@ class Codegen {
         Codegen.mode = mode;
     }
 
-    static Decoder getDecoder(String cacheKey, Type type) {
+    static Decoder getDecoder(String cacheKey, Type type, Class viewClass) {
         Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
         if (decoder != null) {
             return decoder;
         }
-        return gen(cacheKey, type);
+        return gen(cacheKey, type, viewClass);
     }
 
-    private synchronized static Decoder gen(String cacheKey, Type type) {
+    private synchronized static Decoder gen(String cacheKey, Type type, Class viewClass) {
         Decoder decoder = JsoniterSpi.getDecoder(cacheKey);
         if (decoder != null) {
             return decoder;
@@ -44,7 +44,7 @@ class Codegen {
         for (Extension extension : extensions) {
             type = extension.chooseImplementation(type);
         }
-        type = chooseImpl(type);
+        type = chooseImpl(type,viewClass);
         for (Extension extension : extensions) {
             decoder = extension.createDecoder(cacheKey, type);
             if (decoder != null) {
@@ -108,7 +108,7 @@ class Codegen {
         return generatedClassNames.contains(cacheKey);
     }
 
-    private static Type chooseImpl(Type type) {
+    private static Type chooseImpl(Type type, Class viewClass) {
         Type[] typeArgs = new Type[0];
         Class clazz;
         if (type instanceof ParameterizedType) {
@@ -118,7 +118,8 @@ class Codegen {
         } else {
             clazz = (Class) type;
         }
-        Class implClazz = JsoniterSpi.getTypeImplementation(clazz);
+        Class implClazz = JsoniterSpi.getTypeViewImplementation(clazz,viewClass);
+        System.out.println("implClazz: " + implClazz);
         if (Collection.class.isAssignableFrom(clazz)) {
             Type compType = Object.class;
             if (typeArgs.length == 0) {
@@ -252,7 +253,7 @@ class Codegen {
     public static void staticGenDecoders(TypeLiteral[] typeLiterals) {
         isDoingStaticCodegen = true;
         for (TypeLiteral typeLiteral : typeLiterals) {
-            gen(typeLiteral.getDecoderCacheKey(), typeLiteral.getType());
+            gen(typeLiteral.getDecoderCacheKey(), typeLiteral.getType(), null);
         }
     }
 }

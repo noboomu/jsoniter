@@ -325,14 +325,32 @@ public class JsonStream extends OutputStream {
         }
         Class<?> clazz = obj.getClass();
         String cacheKey = TypeLiteral.create(clazz).getEncoderCacheKey();
-        Codegen.getEncoder(cacheKey, clazz).encode(obj, this);
+        Codegen.getEncoder(cacheKey, clazz,null).encode(obj, this);
     }
 
     public final <T> void writeVal(TypeLiteral<T> typeLiteral, T obj) throws IOException {
         if (null == obj) {
             writeNull();
         } else {
-            Codegen.getEncoder(typeLiteral.getEncoderCacheKey(), typeLiteral.getType()).encode(obj, this);
+            Codegen.getEncoder(typeLiteral.getEncoderCacheKey(), typeLiteral.getType(),null).encode(obj, this);
+        }
+    }
+    
+    public final void writeViewVal(Object obj, Class viewClass) throws IOException {
+        if (obj == null) {
+            writeNull();
+            return;
+        }
+        Class<?> clazz = obj.getClass();
+        String cacheKey = TypeLiteral.create(clazz,viewClass).getEncoderCacheKey();
+         Codegen.getEncoder(cacheKey, clazz,viewClass).encode(obj, this);
+    }
+
+    public final <T> void writeViewVal(TypeLiteral<T> typeLiteral, T obj, Class viewClass) throws IOException {
+        if (null == obj) {
+            writeNull();
+        } else {
+            Codegen.getEncoder(typeLiteral.getEncoderCacheKey(), typeLiteral.getType(),viewClass).encode(obj, this);
         }
     }
 

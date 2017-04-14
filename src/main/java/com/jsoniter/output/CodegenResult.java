@@ -106,6 +106,22 @@ class CodegenResult {
         append(lines, "}");
         return lines.toString();
     }
+    
+    public String generateWrapperCode(Class clazz, Class viewClazz) {
+        flushBuffer();
+        StringBuilder lines = new StringBuilder();
+        append(lines, "public void encode(Object obj, com.jsoniter.output.JsonStream stream) throws java.io.IOException {");
+        append(lines, "if (obj == null) { stream.writeNull(); return; }");
+        if (prelude != null) {
+            append(lines, CodegenResult.bufferToWriteOp(prelude));
+        }
+        append(lines, String.format("encode_((%s)obj, %s viewClass, stream);", clazz.getCanonicalName(),viewClazz.getCanonicalName()));
+        if (epilogue != null) {
+            append(lines, CodegenResult.bufferToWriteOp(epilogue));
+        }
+        append(lines, "}");
+        return lines.toString();
+    }
 
     private static void append(StringBuilder lines, String line) {
         lines.append(line);

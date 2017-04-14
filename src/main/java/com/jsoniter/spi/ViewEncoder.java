@@ -5,26 +5,26 @@ import com.jsoniter.output.JsonStream;
 
 import java.io.IOException;
 
-public interface Encoder {
+public interface ViewEncoder {
 
-    void encode(Object obj, JsonStream stream) throws IOException;
+    void encode(Object obj, Class viewClass, JsonStream stream) throws IOException;
 
 
     Any wrap(Object obj);
 
-    abstract class BooleanEncoder implements Encoder {
+    abstract class BooleanEncoder implements ViewEncoder {
         @Override
-        public void encode(Object obj, JsonStream stream) throws IOException {
+        public void encode(Object obj,Class viewClass, JsonStream stream) throws IOException {
             encodeBoolean((Boolean) obj, stream);
         }
 
         public abstract void encodeBoolean(boolean obj, JsonStream stream) throws IOException;
     }
 
-    abstract class ShortEncoder implements Encoder {
+    abstract class ShortEncoder implements ViewEncoder {
 
         @Override
-        public void encode(Object obj, JsonStream stream) throws IOException {
+        public void encode(Object obj, Class viewClass,JsonStream stream) throws IOException {
             encodeShort((Short) obj, stream);
         }
 
@@ -47,9 +47,9 @@ public interface Encoder {
         }
     }
 
-    abstract class IntEncoder implements Encoder {
+    abstract class IntEncoder implements ViewEncoder {
         @Override
-        public void encode(Object obj, JsonStream stream) throws IOException {
+        public void encode(Object obj, Class viewClass,JsonStream stream) throws IOException {
             encodeInt((Integer) obj, stream);
         }
 
@@ -72,9 +72,9 @@ public interface Encoder {
         }
     }
 
-    abstract class LongEncoder implements Encoder {
+    abstract class LongEncoder implements ViewEncoder {
         @Override
-        public void encode(Object obj, JsonStream stream) throws IOException {
+        public void encode(Object obj, Class viewClass,JsonStream stream) throws IOException {
             encodeLong((Long) obj, stream);
         }
 
@@ -97,9 +97,9 @@ public interface Encoder {
         }
     }
 
-    abstract class FloatEncoder implements Encoder {
+    abstract class FloatEncoder implements ViewEncoder {
         @Override
-        public void encode(Object obj, JsonStream stream) throws IOException {
+        public void encode(Object obj, Class viewClass,JsonStream stream) throws IOException {
             encodeFloat((Float) obj, stream);
         }
 
@@ -122,9 +122,9 @@ public interface Encoder {
         }
     }
 
-    abstract class DoubleEncoder implements Encoder {
+    abstract class DoubleEncoder implements ViewEncoder {
         @Override
-        public void encode(Object obj, JsonStream stream) throws IOException {
+        public void encode(Object obj, Class viewClass,JsonStream stream) throws IOException {
             encodeDouble((Double) obj, stream);
         }
 

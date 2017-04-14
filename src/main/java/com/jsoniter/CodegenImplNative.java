@@ -205,7 +205,7 @@ class CodegenImplNative {
                         return nativeRead;
                     }
                 }
-                Codegen.getDecoder(cacheKey, valueType);
+                Codegen.getDecoder(cacheKey, valueType,null);
                 if (Codegen.canStaticAccess(cacheKey)) {
                     return String.format("%s.decode_(iter)", cacheKey);
                 } else {

@@ -307,7 +307,25 @@ public class JsonIterator implements Closeable {
         try {
             this.existingObject = existingObject;
             Class<?> clazz = existingObject.getClass();
-            return (T) Codegen.getDecoder(TypeLiteral.create(clazz).getDecoderCacheKey(), clazz).decode(this);
+            return (T) Codegen.getDecoder(TypeLiteral.create(clazz).getDecoderCacheKey(), clazz,null).decode(this);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw reportError("read", "premature end");
+        }
+    }
+    
+    /**
+     * try to bind to existing object, returned object might not the same instance
+     *
+     * @param existingObject the object instance to reuse
+     * @param <T>            object type
+     * @return data binding result, might not be the same object
+     * @throws IOException if I/O went wrong
+     */
+    public final <T> T read(T existingObject, Class viewClass) throws IOException {
+        try {
+            this.existingObject = existingObject;
+            Class<?> clazz = existingObject.getClass();
+            return (T) Codegen.getDecoder(TypeLiteral.create(clazz).getDecoderCacheKey(), clazz,viewClass).decode(this);
         } catch (ArrayIndexOutOfBoundsException e) {
             throw reportError("read", "premature end");
         }
@@ -322,10 +340,28 @@ public class JsonIterator implements Closeable {
      * @return data binding result, might not be the same object
      * @throws IOException if I/O went wrong
      */
+    public final <T> T read(TypeLiteral<T> typeLiteral, T existingObject, Class viewClass) throws IOException {
+        try {
+            this.existingObject = existingObject;
+            return (T) Codegen.getDecoder(typeLiteral.getDecoderCacheKey(), typeLiteral.getType(), viewClass).decode(this);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw reportError("read", "premature end");
+        }
+    }
+    
+    /**
+     * try to bind to existing object, returned object might not the same instance
+     *
+     * @param typeLiteral    the type object
+     * @param existingObject the object instance to reuse
+     * @param <T>            object type
+     * @return data binding result, might not be the same object
+     * @throws IOException if I/O went wrong
+     */
     public final <T> T read(TypeLiteral<T> typeLiteral, T existingObject) throws IOException {
         try {
             this.existingObject = existingObject;
-            return (T) Codegen.getDecoder(typeLiteral.getDecoderCacheKey(), typeLiteral.getType()).decode(this);
+            return (T) Codegen.getDecoder(typeLiteral.getDecoderCacheKey(), typeLiteral.getType(), null).decode(this);
         } catch (ArrayIndexOutOfBoundsException e) {
             throw reportError("read", "premature end");
         }
@@ -333,7 +369,16 @@ public class JsonIterator implements Closeable {
 
     public final <T> T read(Class<T> clazz) throws IOException {
         try {
-            return (T) Codegen.getDecoder(TypeLiteral.create(clazz).getDecoderCacheKey(), clazz).decode(this);
+            return (T) Codegen.getDecoder(TypeLiteral.create(clazz).getDecoderCacheKey(), clazz, null).decode(this);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw reportError("read", "premature end");
+        }
+    }
+    
+
+    public final <T> T read(Class<T> clazz, Class viewClass) throws IOException {
+        try {
+            return (T) Codegen.getDecoder(TypeLiteral.create(clazz).getDecoderCacheKey(), clazz,viewClass).decode(this);
         } catch (ArrayIndexOutOfBoundsException e) {
             throw reportError("read", "premature end");
         }
@@ -342,7 +387,16 @@ public class JsonIterator implements Closeable {
     public final <T> T read(TypeLiteral<T> typeLiteral) throws IOException {
         try {
             String cacheKey = typeLiteral.getDecoderCacheKey();
-            return (T) Codegen.getDecoder(cacheKey, typeLiteral.getType()).decode(this);
+            return (T) Codegen.getDecoder(cacheKey, typeLiteral.getType(), null).decode(this);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw reportError("read", "premature end");
+        }
+    }
+    
+    public final <T> T read(TypeLiteral<T> typeLiteral, Class viewClass) throws IOException {
+        try {
+            String cacheKey = typeLiteral.getDecoderCacheKey();
+            return (T) Codegen.getDecoder(cacheKey, typeLiteral.getType(), viewClass).decode(this);
         } catch (ArrayIndexOutOfBoundsException e) {
             throw reportError("read", "premature end");
         }

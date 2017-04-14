@@ -19,7 +19,7 @@ class ReflectionCollectionDecoder implements Decoder {
         } catch (NoSuchMethodException e) {
             throw new JsonException(e);
         }
-        compTypeDecoder = Codegen.getDecoder(TypeLiteral.create(typeArgs[0]).getDecoderCacheKey(), typeArgs[0]);
+        compTypeDecoder = Codegen.getDecoder(TypeLiteral.create(typeArgs[0]).getDecoderCacheKey(), typeArgs[0], null);
     }
 
     @Override

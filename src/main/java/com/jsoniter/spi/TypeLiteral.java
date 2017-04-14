@@ -52,7 +52,7 @@ public class TypeLiteral<T> {
         put(Any.class, NativeType.ANY);
     }};
 
-    private volatile static Map<Type, TypeLiteral> typeLiteralCache = new HashMap<Type, TypeLiteral>();
+    private volatile static Map<String, TypeLiteral> typeLiteralCache = new HashMap<String, TypeLiteral>();
     final Type type;
     final String decoderCacheKey;
     final String encoderCacheKey;
@@ -68,7 +68,7 @@ public class TypeLiteral<T> {
         this.type = getSuperclassTypeParameter(getClass());
         nativeType = nativeTypes.get(this.type);
         decoderCacheKey = generateDecoderCacheKey(type);
-        encoderCacheKey = generateEncoderCacheKey(type);
+        encoderCacheKey = generateEncoderCacheKey(type,null);
     }
 
     public TypeLiteral(Type type, String decoderCacheKey, String encoderCacheKey) {
@@ -79,14 +79,14 @@ public class TypeLiteral<T> {
     }
 
     private static String generateDecoderCacheKey(Type type) {
-        return generateCacheKey(type, "decoder.");
+        return generateCacheKey(type, "decoder.",null);
     }
 
-    private static String generateEncoderCacheKey(Type type) {
-        return generateCacheKey(type, "encoder.");
+    private static String generateEncoderCacheKey(Type type, Class viewClazz) {
+        return generateCacheKey(type, "encoder.",viewClazz);
     }
 
-    private static String generateCacheKey(Type type, String prefix) {
+    private static String generateCacheKey(Type type, String prefix, Class viewClazz) {
         StringBuilder decoderClassName = new StringBuilder(prefix);
         if (type instanceof Class) {
             Class clazz = (Class) type;
@@ -117,8 +117,15 @@ public class TypeLiteral<T> {
             Type compType = gaType.getGenericComponentType();
             decoderClassName.append(formatTypeWithoutSpecialCharacter(compType));
             decoderClassName.append("_array");
-        } else {
+        }
+        else {
+         
             throw new UnsupportedOperationException("do not know how to handle: " + type);
+        }
+        
+        if(viewClazz != null)
+        {
+        	decoderClassName.append("_"+viewClazz.getSimpleName() + "View");
         }
         return decoderClassName.toString().replace("$", "_");
     }
@@ -153,24 +160,36 @@ public class TypeLiteral<T> {
         return parameterized.getActualTypeArguments()[0];
     }
 
-    public static TypeLiteral create(Type valueType) {
-        TypeLiteral typeLiteral = typeLiteralCache.get(valueType);
+    public static TypeLiteral create(Type valueType, Class viewClazz) {
+    	
+        TypeLiteral typeLiteral = typeLiteralCache.get(valueType.getTypeName() + "_" + viewClazz.getSimpleName());
         if (typeLiteral != null) {
             return typeLiteral;
         }
-        return createNew(valueType);
+        return createNew(valueType, viewClazz);
+    }
+    
+    public static TypeLiteral create(Type valueType ) {
+    	
+        TypeLiteral typeLiteral = typeLiteralCache.get(valueType.getTypeName());
+        if (typeLiteral != null) {
+            return typeLiteral;
+        }
+        return createNew(valueType, null);
     }
 
-    private synchronized static TypeLiteral createNew(Type valueType) {
+    private synchronized static TypeLiteral createNew(Type valueType, Class viewClazz) {
         TypeLiteral typeLiteral = typeLiteralCache.get(valueType);
         if (typeLiteral != null) {
             return typeLiteral;
         }
-        HashMap<Type, TypeLiteral> copy = new HashMap<Type, TypeLiteral>(typeLiteralCache);
+        HashMap<String, TypeLiteral> copy = new HashMap<String, TypeLiteral>(typeLiteralCache);
         typeLiteral = new TypeLiteral(valueType,
                 generateDecoderCacheKey(valueType),
-                generateEncoderCacheKey(valueType));
-        copy.put(valueType, typeLiteral);
+                generateEncoderCacheKey(valueType,viewClazz));
+        
+        String key = viewClazz != null ? valueType.getTypeName() + "_" + viewClazz.getSimpleName() : valueType.getTypeName();
+        copy.put(key, typeLiteral);
         typeLiteralCache = copy;
         return typeLiteral;
     }

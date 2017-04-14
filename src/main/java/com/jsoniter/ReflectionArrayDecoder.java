@@ -14,7 +14,7 @@ class ReflectionArrayDecoder implements Decoder {
 
     public ReflectionArrayDecoder(Class clazz) {
         componentType = clazz.getComponentType();
-        compTypeDecoder = Codegen.getDecoder(TypeLiteral.create(componentType).getDecoderCacheKey(), componentType);
+        compTypeDecoder = Codegen.getDecoder(TypeLiteral.create(componentType).getDecoderCacheKey(), componentType, null);
     }
 
     @Override
