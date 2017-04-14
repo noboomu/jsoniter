@@ -224,7 +224,7 @@ class Codegen {
             return encoder;
         } catch (Exception e) {
             String msg = "failed to generate encoder for: " + type + " with " + Arrays.toString(typeArgs) + ", exception: " + e;
-            msg = msg + "\n" + source;
+            msg = msg + "\n------------\n" + source + "\n-------------";
             throw new JsonException(msg, e);
         }
     }

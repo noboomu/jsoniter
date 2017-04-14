@@ -1,7 +1,9 @@
 package com.jsoniter.spi;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -199,10 +201,45 @@ public class JsoniterSpi {
         desc.getters = getGetters(lookup, clazz, includingPrivate);
         desc.wrappers = new ArrayList<WrapperDescriptor>();
         desc.unWrappers = new ArrayList<Method>();
+        desc.viewFields = new HashMap<>();
+        desc.viewFields.put(Void.class, new HashSet<Binding>());
+        
         for (Extension extension : extensions) {
             extension.updateClassDescriptor(desc);
         }
+        
         encodingDeduplicate(desc);
+         
+        desc.viewFields.get(Void.class).addAll(desc.allEncoderBindings());
+        
+        desc.allEncoderBindings().stream().filter( b -> {
+        	return b.annotations != null && b.annotations.length > 0;
+        }).forEach( b -> {
+        	
+        	Set<Class<?>> viewClasses = Arrays.stream(b.annotations).filter( a -> { 
+        		return (a instanceof JsonView); 
+        	}).flatMap( a -> Arrays.stream(((JsonView) a).value()) )
+        	.collect(Collectors.toSet());
+        	
+        	for( Class<?> vc : viewClasses )
+        	{
+        		Set<Binding> bindings = desc.viewFields.get(vc);
+        		
+        		if( bindings == null )
+        		{
+        			bindings = new HashSet<Binding>();
+        			desc.viewFields.put(vc, bindings);
+        		}
+        		
+        		bindings.add(b);
+        	}
+        	
+        	
+        });
+        
+        
+        System.out.println( desc.viewFields);
+        
         for (Binding binding : desc.allEncoderBindings()) {
             if (binding.toNames == null) {
                 binding.toNames = new String[]{binding.name};
@@ -342,8 +379,6 @@ public class JsoniterSpi {
         ArrayList<Binding> bindings = new ArrayList<Binding>();
         for (Field field : getAllFields(clazz, includingPrivate)) {
         	
-        	 
-        	
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
@@ -362,43 +397,7 @@ public class JsoniterSpi {
         return bindings;
     }
     
-    @SuppressWarnings("unchecked")
-	private static List<Binding> getFields(Map<String, Type> lookup, Class clazz, Class viewClazz, boolean includingPrivate) {
-        ArrayList<Binding> bindings = new ArrayList<Binding>();
-        for (Field field : getAllFields(clazz, includingPrivate)) {
-        	
-//        	JsonView viewAnnotation = field.getAnnotation(JsonView.class);
-//        	
-//        	if(viewAnnotation != null)
-//        	{
-//        		if( !Arrays.stream(viewAnnotation.value()).anyMatch( v -> v.equals(viewClazz)) )
-//        		{
-//        			System.out.println("Class has NO annotation for " + viewClazz + " on field " + field.getName());
-//        			continue;
-//        		}
-//        		else
-//        		{
-//        			System.out.println("Class has annotation for " + viewClazz + " on field " + field.getName());
-//        		}
-//        	}
-//        	
-            if (Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            if (Modifier.isTransient(field.getModifiers())) {
-                continue;
-            }
-            if (!includingPrivate && !Modifier.isPublic(field.getType().getModifiers())) {
-                continue;
-            }
-            if (includingPrivate) {
-                field.setAccessible(true);
-            }
-            Binding binding = createBindingFromField(lookup, clazz, field);
-            bindings.add(binding);
-        }
-        return bindings;
-    }
+  
 
     private static Binding createBindingFromField(Map<String, Type> lookup, Class clazz, Field field) {
         try {
@@ -521,55 +520,6 @@ public class JsoniterSpi {
         return getters;
     }
     
-    private static List<Binding> getGetters(Map<String, Type> lookup, Class clazz, Class viewClazz,  boolean includingPrivate) {
-        ArrayList<Binding> getters = new ArrayList<Binding>();
-        for (Method method : getAllMethods(clazz, includingPrivate)) {
-        	
-//        	JsonView viewAnnotation = method.getAnnotation(JsonView.class);
-//        	
-//        	if(viewAnnotation != null)
-//        	{
-//        		if( !Arrays.stream(viewAnnotation.value()).anyMatch( v -> v.equals(viewClazz)) )
-//        		{
-//        			System.out.println("Class has NO annotation for " + viewClazz + " on method " + method.getName());
-//        			continue;
-//        		}
-//        		else
-//        		{
-//        			System.out.println("Class has annotation for " + viewClazz + " on method " + method.getName());
-//        		}
-//        	}
-        	
-            if (Modifier.isStatic(method.getModifiers())) {
-                continue;
-            }
-            String methodName = method.getName();
-            if ("getClass".equals(methodName)) {
-                continue;
-            }
-            if (methodName.length() < 4) {
-                continue;
-            }
-            if (!methodName.startsWith("get")) {
-                continue;
-            }
-            if (method.getGenericParameterTypes().length != 0) {
-                continue;
-            }
-            String toName = methodName.substring("get".length());
-            char[] fromNameChars = toName.toCharArray();
-            fromNameChars[0] = Character.toLowerCase(fromNameChars[0]);
-            toName = new String(fromNameChars);
-            Binding getter = new Binding(clazz, lookup, method.getGenericReturnType());
-            getter.toNames = new String[]{toName};
-            getter.name = toName;
-            getter.method = method;
-            getter.annotations = method.getAnnotations();
-            getters.add(getter);
-        }
-        return getters;
-    }
-
     public static void dump() {
         for (String cacheKey : decoders.keySet()) {
             System.err.println(cacheKey);
