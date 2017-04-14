@@ -20,8 +20,7 @@ public class ClassDescriptor {
     public boolean asExtraForUnknownProperties;
     public Binding onMissingProperties;
     public Binding onExtraProperties;
-    public Map<Class<?>, Set<Binding>> viewFields;
-
+ 
     public List<Binding> allBindings() {
         ArrayList<Binding> bindings = new ArrayList<Binding>(8);
         bindings.addAll(fields);

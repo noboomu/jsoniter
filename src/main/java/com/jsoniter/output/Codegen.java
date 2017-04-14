@@ -15,7 +15,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-class Codegen {
+public class Codegen {
 
     static EncodingMode mode = EncodingMode.REFLECTION_MODE;
     static boolean isDoingStaticCodegen;
@@ -87,7 +87,7 @@ class Codegen {
 
     private static synchronized Encoder gen(String cacheKey, Type type) {
     	
-    	System.out.println("code key: " + cacheKey);
+    	System.out.println("creating encoder for key: " + cacheKey + " for type " + type);
     	
         Encoder encoder = JsoniterSpi.getEncoder(cacheKey);
         if (encoder != null) {
@@ -152,6 +152,11 @@ class Codegen {
     private static synchronized Encoder gen(String cacheKey, Type type, Class viewClazz) {
     	
     	System.out.println("gen encoder with key: " + cacheKey + "  for type " + type + " viewClass " + viewClazz );
+    	
+    	if(viewClazz == null)
+    	{
+    		return gen(cacheKey,type);
+    	}
 
         Encoder encoder = JsoniterSpi.getEncoder(cacheKey);
         if (encoder != null) {
@@ -204,7 +209,7 @@ class Codegen {
         
     	System.out.println("Generating source for " + clazz);
 
-        CodegenResult source = genSource(cacheKey, clazz, viewClazz, typeArgs);
+        CodegenResult source = genSource(cacheKey, clazz, viewClazz,   typeArgs);
         
         System.out.println("Generated source: " + source.toString());
         try {

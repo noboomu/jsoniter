@@ -200,45 +200,88 @@ public class JsoniterSpi {
         desc.fields = getFields(lookup, clazz,  includingPrivate);
         desc.getters = getGetters(lookup, clazz, includingPrivate);
         desc.wrappers = new ArrayList<WrapperDescriptor>();
-        desc.unWrappers = new ArrayList<Method>();
-        desc.viewFields = new HashMap<>();
-        desc.viewFields.put(Void.class, new HashSet<Binding>());
+        desc.unWrappers = new ArrayList<Method>(); 
         
         for (Extension extension : extensions) {
             extension.updateClassDescriptor(desc);
         }
         
         encodingDeduplicate(desc);
+       
+        
+        for (Binding binding : desc.allEncoderBindings()) {
+            if (binding.toNames == null) {
+                binding.toNames = new String[]{binding.name};
+            }
+            if (binding.field != null && includingPrivate) {
+                binding.field.setAccessible(true);
+            }
+            if (binding.method != null && includingPrivate) {
+                binding.method.setAccessible(true);
+            }
+            if (binding.encoder != null) {
+                JsoniterSpi.addNewEncoder(binding.encoderCacheKey(), binding.encoder);
+            }
+        }
+        return desc;
+    }
+    
+    public static ClassDescriptor getEncodingClassDescriptor(Class clazz, Class viewClazz, boolean includingPrivate) {
+    	
+    	if(viewClazz == null)
+    	{
+    		return getEncodingClassDescriptor(clazz,includingPrivate);
+    	}
+    	
+        Map<String, Type> lookup = collectTypeVariableLookup(clazz);
+        ClassDescriptor desc = new ClassDescriptor();
+        desc.clazz = clazz;
+        desc.lookup = lookup;
+        desc.fields = getFields(lookup, clazz,  includingPrivate);
+        desc.getters = getGetters(lookup, clazz, includingPrivate);
+        desc.wrappers = new ArrayList<WrapperDescriptor>();
+        desc.unWrappers = new ArrayList<Method>();
+          
+        for (Extension extension : extensions) {
+            extension.updateClassDescriptor(desc);
+        }
+        
+        
          
-        desc.viewFields.get(Void.class).addAll(desc.allEncoderBindings());
+        System.out.println( "all bindings before: ");
+        desc.fields.stream().forEach( b -> System.out.println(b + " field annotations: " + b.annotations.length));
+        desc.getters.stream().forEach( b -> System.out.println(b + " getter annotations: " + b.annotations.length));
+
         
         desc.allEncoderBindings().stream().filter( b -> {
         	return b.annotations != null && b.annotations.length > 0;
         }).forEach( b -> {
         	
+        	System.out.println("binding " + b + " annotations: " + b.annotations);
         	Set<Class<?>> viewClasses = Arrays.stream(b.annotations).filter( a -> { 
         		return (a instanceof JsonView); 
         	}).flatMap( a -> Arrays.stream(((JsonView) a).value()) )
         	.collect(Collectors.toSet());
         	
-        	for( Class<?> vc : viewClasses )
+        	
+        	 
+        	if( !viewClasses.contains(viewClazz) && viewClasses.size() > 0 )
         	{
-        		Set<Binding> bindings = desc.viewFields.get(vc);
-        		
-        		if( bindings == null )
-        		{
-        			bindings = new HashSet<Binding>();
-        			desc.viewFields.put(vc, bindings);
-        		}
-        		
-        		bindings.add(b);
+        		System.out.println("binding " + b + " is hidden from " + viewClasses);
+
+        		desc.fields.remove(b);
+        		desc.getters.remove(b);
+        	} 
+        	else
+        	{
+        		System.out.println("binding " + b + " is not filtered by " + viewClasses);
         	}
-        	
-        	
         });
         
-        
-        System.out.println( desc.viewFields);
+        encodingDeduplicate(desc);
+
+        System.out.println( "all bindings after: ");
+        desc.allEncoderBindings().stream().forEach( b -> System.out.println(b));
         
         for (Binding binding : desc.allEncoderBindings()) {
             if (binding.toNames == null) {
@@ -379,7 +422,7 @@ public class JsoniterSpi {
         ArrayList<Binding> bindings = new ArrayList<Binding>();
         for (Field field : getAllFields(clazz, includingPrivate)) {
         	
-            if (Modifier.isStatic(field.getModifiers())) {
+             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
             if (Modifier.isTransient(field.getModifiers())) {
@@ -406,6 +449,8 @@ public class JsoniterSpi {
             binding.name = field.getName();
             binding.annotations = field.getAnnotations();
             binding.field = field;
+            
+            System.out.println("field: " + field.getName() + " has annotations: " + binding.annotations.length);
             return binding;
         } catch (Exception e) {
             throw new JsonException("failed to create binding for field: " + field, e);

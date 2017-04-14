@@ -8,7 +8,7 @@ import java.io.IOException;
 public interface Encoder {
 
     void encode(Object obj, JsonStream stream) throws IOException;
-
+ 
 
     Any wrap(Object obj);
 

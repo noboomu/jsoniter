@@ -36,7 +36,7 @@ class DynamicCodegen {
     
     public static Encoder gen(Class clazz, Class viewClazz, String cacheKey, CodegenResult source) throws Exception {
     	
-    	System.out.println("Making encoder for class: " + clazz + " viewClazz: " + viewClazz);
+    	System.out.println("Making encoder for class: " + clazz + " viewClazz: " + viewClazz + "\ncacheKey: " + cacheKey + "\nsource: " + source);
     	
     	if(viewClazz == null)
     	{
@@ -45,18 +45,20 @@ class DynamicCodegen {
     	
         source.flushBuffer();
         CtClass ctClass = pool.makeClass(cacheKey);
-        ctClass.setInterfaces(new CtClass[]{pool.get(Encoder.class.getName()),pool.get(ViewEncoder.class.getName())});
+        ctClass.setInterfaces(new CtClass[]{pool.get(Encoder.class.getName())});
  
         ctClass.setSuperclass(pool.get(EmptyEncoder.class.getName()));
         String staticCode = source.toString();
         CtMethod staticMethod = CtNewMethod.make(staticCode, ctClass);
         ctClass.addMethod(staticMethod);
-        String wrapperCode = source.generateWrapperCode(clazz,viewClazz);
+        String wrapperCode = source.generateWrapperCode(clazz);
         if ("true".equals(System.getenv("JSONITER_DEBUG"))) {
             System.out.println(">>> " + cacheKey);
             System.out.println(wrapperCode);
             System.out.println(staticCode);
         }
+        
+        System.out.println("\n\nCompiling:\n" + wrapperCode + "\n\nforClass: " + ctClass);
         CtMethod interfaceMethod = CtNewMethod.make(wrapperCode, ctClass);
         ctClass.addMethod(interfaceMethod);
         return (Encoder) ctClass.toClass().newInstance();

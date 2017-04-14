@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-class CodegenImplNative {
+public class CodegenImplNative {
     public static final Map<Type, Encoder> NATIVE_ENCODERS = new IdentityHashMap<Type, Encoder>() {{
         put(boolean.class, new Encoder() {
             @Override

@@ -3,7 +3,7 @@ package com.jsoniter.output;
 import java.lang.reflect.Type;
 import java.util.*;
 
-class CodegenImplArray {
+public class CodegenImplArray {
 
     public static CodegenResult genArray(String cacheKey, Class clazz) {
         Class compType = clazz.getComponentType();

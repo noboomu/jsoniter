@@ -52,7 +52,7 @@ public class TypeLiteral<T> {
         put(Any.class, NativeType.ANY);
     }};
 
-    private volatile static Map<String, TypeLiteral> typeLiteralCache = new HashMap<String, TypeLiteral>();
+    private volatile static Map<Type, TypeLiteral> typeLiteralCache = new HashMap<Type, TypeLiteral>();
     final Type type;
     final String decoderCacheKey;
     final String encoderCacheKey;
@@ -68,7 +68,7 @@ public class TypeLiteral<T> {
         this.type = getSuperclassTypeParameter(getClass());
         nativeType = nativeTypes.get(this.type);
         decoderCacheKey = generateDecoderCacheKey(type);
-        encoderCacheKey = generateEncoderCacheKey(type,null);
+        encoderCacheKey = generateEncoderCacheKey(type);
     }
 
     public TypeLiteral(Type type, String decoderCacheKey, String encoderCacheKey) {
@@ -79,14 +79,14 @@ public class TypeLiteral<T> {
     }
 
     private static String generateDecoderCacheKey(Type type) {
-        return generateCacheKey(type, "decoder.",null);
+        return generateCacheKey(type, "decoder.");
     }
 
-    private static String generateEncoderCacheKey(Type type, Class viewClazz) {
-        return generateCacheKey(type, "encoder.",viewClazz);
+    private static String generateEncoderCacheKey(Type type) {
+        return generateCacheKey(type, "encoder.");
     }
 
-    private static String generateCacheKey(Type type, String prefix, Class viewClazz) {
+    private static String generateCacheKey(Type type, String prefix ) {
         StringBuilder decoderClassName = new StringBuilder(prefix);
         if (type instanceof Class) {
             Class clazz = (Class) type;
@@ -123,10 +123,10 @@ public class TypeLiteral<T> {
             throw new UnsupportedOperationException("do not know how to handle: " + type);
         }
         
-        if(viewClazz != null)
-        {
-        	decoderClassName.append("_"+viewClazz.getSimpleName() + "View");
-        }
+//        if(viewClazz != null)
+//        {
+//        	decoderClassName.append("_"+viewClazz.getSimpleName() + "View");
+//        }
         return decoderClassName.toString().replace("$", "_");
     }
 
@@ -162,34 +162,64 @@ public class TypeLiteral<T> {
 
     public static TypeLiteral create(Type valueType, Class viewClazz) {
     	
-        TypeLiteral typeLiteral = typeLiteralCache.get(valueType.getTypeName() + "_" + viewClazz.getSimpleName());
+    	final Type type;
+    	if(viewClazz != null)
+    	{
+            type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
+    	}
+    	else
+    	{
+    		type = valueType;
+    	}
+    	
+    	System.out.println("\nCreating literal for " + type + " typeName: " + type.getTypeName() + " with view " + viewClazz);
+
+ 
+        TypeLiteral typeLiteral = typeLiteralCache.get(type);
         if (typeLiteral != null) {
             return typeLiteral;
         }
+        
+       
         return createNew(valueType, viewClazz);
     }
     
-    public static TypeLiteral create(Type valueType ) {
+    public static TypeLiteral create( Type valueType ) {
     	
-        TypeLiteral typeLiteral = typeLiteralCache.get(valueType.getTypeName());
+         TypeLiteral typeLiteral = typeLiteralCache.get(valueType );
         if (typeLiteral != null) {
             return typeLiteral;
         }
         return createNew(valueType, null);
     }
+    
+     
+
 
     private synchronized static TypeLiteral createNew(Type valueType, Class viewClazz) {
-        TypeLiteral typeLiteral = typeLiteralCache.get(valueType);
+    	
+    	System.out.println("\nCreating literal for " + valueType + " typeName: " + valueType.getTypeName() + " with view " + viewClazz);
+
+    	final Type type;
+    	if(viewClazz != null)
+    	{
+            type = new ParameterizedTypeImpl(new Type[]{viewClazz},null, valueType);
+    	}
+    	else
+    	{
+    		type = valueType;
+    	}
+    	
+        TypeLiteral typeLiteral = typeLiteralCache.get(type);
         if (typeLiteral != null) {
             return typeLiteral;
         }
-        HashMap<String, TypeLiteral> copy = new HashMap<String, TypeLiteral>(typeLiteralCache);
-        typeLiteral = new TypeLiteral(valueType,
-                generateDecoderCacheKey(valueType),
-                generateEncoderCacheKey(valueType,viewClazz));
+        HashMap<Type, TypeLiteral> copy = new HashMap<Type, TypeLiteral>(typeLiteralCache);
+        typeLiteral = new TypeLiteral(type,
+                generateDecoderCacheKey(type),
+                generateEncoderCacheKey(type));
         
-        String key = viewClazz != null ? valueType.getTypeName() + "_" + viewClazz.getSimpleName() : valueType.getTypeName();
-        copy.put(key, typeLiteral);
+        copy.put(type, typeLiteral);
         typeLiteralCache = copy;
         return typeLiteral;
     }

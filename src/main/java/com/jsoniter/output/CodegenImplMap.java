@@ -3,7 +3,7 @@ package com.jsoniter.output;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-class CodegenImplMap {
+public class CodegenImplMap {
     public static CodegenResult genMap(String cacheKey, Class clazz, Type[] typeArgs) {
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
