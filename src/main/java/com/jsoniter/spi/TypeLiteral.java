@@ -118,7 +118,7 @@ public class TypeLiteral<T> {
             		
 //            		Type[] typeArgs = Arrays.stream(pType.getActualTypeArguments()).toArray(Type[]::new);
             		
-            		System.out.println("Decoder Type args: " + Arrays.toString(pType.getActualTypeArguments()));
+            	//	System.out.println("Decoder Type args: " + Arrays.toString(pType.getActualTypeArguments()));
             		
 	                Class clazz = (Class) rType;
 	                decoderClassName.append(clazz.getCanonicalName().replace("[]", "_array"));
@@ -126,14 +126,14 @@ public class TypeLiteral<T> {
 	                    String typeName = formatTypeWithoutSpecialCharacter(pType.getActualTypeArguments()[i]);
 	                     
 	                    
-	                    System.out.println("decoder class name: " + decoderClassName + " adding " + pType.getActualTypeArguments()[i]);
+	                   // System.out.println("decoder class name: " + decoderClassName + " adding " + pType.getActualTypeArguments()[i]);
 	                    	if( pType.getActualTypeArguments()[i] instanceof Class)
 	                    	{	
 	                    		Class<?> decoderArgClass = (Class<?>)pType.getActualTypeArguments()[i];
 	                    		
 	                    		if(((JsonContext.class).isAssignableFrom(decoderArgClass)))
 	                    		{
-	                    			System.out.println("Skipping class " + decoderArgClass);
+	                    			//System.out.println("Skipping class " + decoderArgClass);
 	                    			continue;
 	                    		} 
 	                    	} 
@@ -155,18 +155,25 @@ public class TypeLiteral<T> {
                 
                 for( Type t : typeArgs )
                 {
-                	Class<?> clazz = (Class<?>) t;
-               // 	System.err.println("Type arg " + clazz + " is context: " + ((JsonContext.class).isAssignableFrom(clazz)));
-                	if(((JsonContext.class).isAssignableFrom(clazz)))
+                	System.err.println(type + "\n\tencoder type arg: " + t);
+                	if( t instanceof Class)
                 	{
-                		 contextType = t;
-                	 
-                		 
-                		 break;
-                	}
-                }
-             //   System.err.println("args before: " + Arrays.toString(typeArgs) + " context: " + contextType);
+                    	System.err.println(type + "\n\tencoder type arg is class");
 
+                		Class<?> clazz = (Class<?>) t;
+                		if(((JsonContext.class).isAssignableFrom(clazz)))
+                    	{
+                    		 contextType = t; 
+                    		 break;
+                    	}
+                	}
+                	 
+               // 	System.err.println("Type arg " + clazz + " is context: " + ((JsonContext.class).isAssignableFrom(clazz)));
+                	 
+                }
+                System.err.println(type + "\n\targs before: " + Arrays.toString(typeArgs) + " context: " + contextType);
+                System.err.println("pType: " + pType);
+                System.err.println("rType: " + rType);
                 if(contextType != null)
                 {
                //     System.err.println("context: " + contextType);
@@ -193,6 +200,7 @@ public class TypeLiteral<T> {
                		Type[] newArgs = new Type[typeArgs.length+1];
                		
                		
+               		
              		System.arraycopy(typeArgs, 0, newArgs, 0, typeArgs.length);
             		newArgs[typeArgs.length] = pType.getActualTypeArguments()[0];
             		typeArgs = newArgs; 
@@ -203,7 +211,10 @@ public class TypeLiteral<T> {
             		//pType = (ParameterizedType) pType.getRawType();
                 }
                 
-               // System.err.println("args after: " + Arrays.toString(typeArgs));
+                 System.err.println(type + "\n\targs after: " + Arrays.toString(typeArgs));
+                 
+                 System.err.println("pType: " + pType);
+                 System.err.println("rType: " + rType);
                 /*
                  * 
                  		Type[] newArgs = new Type[typeArgs.length+1];
@@ -221,8 +232,8 @@ public class TypeLiteral<T> {
        			 	
                  }
                 
-             //   System.err.println("pType: " + pType);
-             //   System.err.println("rType: " + rType);
+           System.err.println("pType: " + pType);
+         System.err.println("rType: " + rType);
                 
                 typeArgs = Arrays.stream(typeArgs).distinct().toArray(Type[]::new);
                 
@@ -290,6 +301,16 @@ public class TypeLiteral<T> {
     public static TypeLiteral create(Type valueType, Class viewClazz) {
     	
     	final Type type;
+    	
+    	if(valueType instanceof ParameterizedTypeImpl)
+    	{
+    		ParameterizedTypeImpl pType = (ParameterizedTypeImpl)valueType;
+    		if( pType.hasJsonContext() )
+    		{
+    			viewClazz = null;
+    		}
+    	}
+    	
     	if(viewClazz != null)
     	{
             type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);

@@ -2,6 +2,7 @@ package com.jsoniter.spi;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.Map;
 
 public class Binding {
@@ -44,7 +45,7 @@ public class Binding {
     public Binding(Class clazz, Map<String, Type> lookup, Type valueType, Class viewClazz) {
     	
     	 
-    	
+    	System.out.println("Making binding for " + clazz + "\nlookup: " + lookup + "\nvalueType: " + valueType + "\nview: " + viewClazz);
         this.clazz = clazz;
         this.clazzTypeLiteral = TypeLiteral.create(clazz,viewClazz);
         
@@ -76,16 +77,18 @@ public class Binding {
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
             Type[] args = pType.getActualTypeArguments();
+            
+            System.err.println("pType: " + pType.getTypeName() + "\nargs before: " +  Arrays.toString(args));
+
             for (int i = 0; i < args.length; i++) {
-            	 System.err.println("before: " + args[0]);
-                args[i] = substituteTypeVariables(lookup, args[i],viewClazz );
+                 args[i] = substituteTypeVariables(lookup, args[i],null );
                 
             //    args[i] = new ParameterizedTypeImpl(new Type[]{   args[i]},null, viewClazz);
-           	 System.err.println("after: " + args[0]);
+                 System.err.println("pType: " + pType.getTypeName() + "\nargs after: " +  Arrays.toString(args));
 
             }
             
-            System.err.println(args[0] + " " + pType.getOwnerType() + " " + pType.getRawType());
+            System.err.println("args: " + Arrays.toString(args) + " owner: " + pType.getOwnerType() + " raw: " + pType.getRawType());
             
             
             return new ParameterizedTypeImpl(args, pType.getOwnerType(), pType.getRawType());

@@ -122,6 +122,7 @@ public class CodegenImplObject {
             valueClazz = binding.method.getReturnType();
             valueAccessor = "obj." + binding.method.getName() + "()";
         }
+     
         if (!supportCollectionValueNullable(valueClazz)) {
             isCollectionValueNullable = true;
         }
@@ -154,7 +155,7 @@ public class CodegenImplObject {
             ctx.buffer(':');
         }
         if (encoder == null) {
-            CodegenImplNative.genWriteOp(ctx, valueAccessor, binding.valueType, null, nullable, isCollectionValueNullable);
+            CodegenImplNative.genWriteOp(ctx, valueAccessor, binding.valueType, viewClazz, nullable, isCollectionValueNullable);
         } else {
             ctx.append(String.format("com.jsoniter.output.CodegenAccess.writeVal(\"%s\", %s, stream);",
                     fieldCacheKey, valueAccessor));

@@ -270,18 +270,11 @@ public class CodegenImplNative {
 
     public static void genWriteOp(CodegenResult ctx, String code, Type valueType, Class viewClazz, boolean isNullable, boolean isCollectionValueNullable) {
     	
-	final Type type;
+    	System.out.println("genWriteOp");
+	final Type type = valueType;
     	
-    	if(viewClazz != null)
-    	{
-    		  type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
-    	}
-    	else
-    	{
-    		type = valueType;
-    	}
-    	
-        String cacheKey = TypeLiteral.create(type).getEncoderCacheKey();
+    
+        String cacheKey = TypeLiteral.create(type,viewClazz).getEncoderCacheKey();
         if (JsoniterSpi.getEncoder(cacheKey) == null) {
             if (!isNullable && String.class == type) {
                 ctx.buffer('"');

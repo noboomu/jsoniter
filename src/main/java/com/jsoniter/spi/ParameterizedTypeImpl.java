@@ -4,15 +4,43 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
+import com.jsoniter.output.JsonContext;
+
 public class ParameterizedTypeImpl implements ParameterizedType {
     private final Type[] actualTypeArguments;
     private final Type   ownerType;
     private final Type   rawType;
+    private final boolean hasJsonContext;
 
     public ParameterizedTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType){
         this.actualTypeArguments = actualTypeArguments;
         this.ownerType = ownerType;
         this.rawType = rawType;
+        
+        if(rawType instanceof Class)
+        {
+        	Class<?> clazz = (Class<?>)rawType;
+        	if(((JsonContext.class).isAssignableFrom(clazz)))
+        	{
+        		hasJsonContext = true;
+        		return;
+        	}
+        }
+        
+        for( Type type : actualTypeArguments )
+        {
+        	   if(type instanceof Class)
+               {
+               	Class<?> clazz = (Class<?>)type;
+               	if(((JsonContext.class).isAssignableFrom(clazz)))
+               	{
+               		hasJsonContext = true;
+               		return;
+               	}
+               }
+        }
+        
+        hasJsonContext = false;
     }
 
     public Type[] getActualTypeArguments() {
@@ -23,7 +51,15 @@ public class ParameterizedTypeImpl implements ParameterizedType {
         return ownerType;
     }
 
-    public Type getRawType() {
+    /**
+	 * @return the hasJsonContext
+	 */
+	public boolean hasJsonContext()
+	{
+		return hasJsonContext;
+	}
+
+	public Type getRawType() {
         return rawType;
     }
     
@@ -70,6 +106,7 @@ public class ParameterizedTypeImpl implements ParameterizedType {
                 "actualTypeArguments=" + Arrays.toString(actualTypeArguments) +
                 ", ownerType=" + ownerType +
                 ", rawType=" + rawTypeName +
+                ", hasJsonContext=" + hasJsonContext + 
                 '}';
     }
 

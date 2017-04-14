@@ -70,6 +70,10 @@ public class Codegen {
     
     public static Encoder getEncoder(String cacheKey, Type type, Class viewClazz ) {
     	
+    	if( type.getTypeName().contains("java.lang") )
+    	{
+    		viewClazz = null;
+    	}
     	System.out.println("Getting encoder with key: " + cacheKey + " and class " + viewClazz);
     	if(viewClazz != null)
     	{

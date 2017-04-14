@@ -114,6 +114,7 @@ public class CodegenImplArray {
     }
 
     private static CodegenResult genCollection(String cacheKey, Class clazz,Class viewClazz, Type compType) {
+
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;
