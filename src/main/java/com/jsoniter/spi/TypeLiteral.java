@@ -1,8 +1,5 @@
 package com.jsoniter.spi;
 
-import com.jsoniter.any.Any;
-import com.jsoniter.output.JsonContext;
-
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -11,6 +8,11 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.jsoniter.any.Any;
+import com.jsoniter.output.JsonContext;
 
 public class TypeLiteral<T> {
 
@@ -54,6 +56,7 @@ public class TypeLiteral<T> {
         put(Any.class, NativeType.ANY);
     }};
 
+    private volatile static Map<Pair<Type,Class<? extends JsonContext>>,TypeLiteral> contextTypeLiteralCache = new HashMap<>();
     private volatile static Map<Type, TypeLiteral> typeLiteralCache = new HashMap<Type, TypeLiteral>();
     final Type type;
     final String decoderCacheKey;
@@ -121,15 +124,15 @@ public class TypeLiteral<T> {
 	                for (int i = 0; i < pType.getActualTypeArguments().length; i++) {
 	                    String typeName = formatTypeWithoutSpecialCharacter(pType.getActualTypeArguments()[i]);
 	                      
- 	                    	if( pType.getActualTypeArguments()[i] instanceof Class)
+ 	                    	if( pType.getActualTypeArguments()[i] instanceof JsonContext)
 	                    	{	
-	                    		Class<?> decoderArgClass = (Class<?>)pType.getActualTypeArguments()[i];
-	                    		
-	                    		if(((JsonContext.class).isAssignableFrom(decoderArgClass)))
-	                    		{
+//	                    		Class<?> decoderArgClass = (Class<?>)pType.getActualTypeArguments()[i];
+//	                    		
+//	                    		if(((JsonContext.class).isAssignableFrom(decoderArgClass)))
+//	                    		{
 	                    			//System.out.println("Skipping class " + decoderArgClass);
 	                    			continue;
-	                    		} 
+	                    		//} 
 	                    	} 
 	                    
 	                    decoderClassName.append('_');
@@ -144,14 +147,14 @@ public class TypeLiteral<T> {
               
                 for( Type t : typeArgs )
                 {
-                 	if( t instanceof Class)
+                 	if( t instanceof JsonContext)
                 	{ 
-                		Class<?> clazz = (Class<?>) t;
-                		if(((JsonContext.class).isAssignableFrom(clazz)))
-                    	{
+//                		Class<?> clazz = (Class<?>) t;
+//                		if(((JsonContext.class).isAssignableFrom(clazz)))
+//                    	{
                     		 contextType = t; 
                     		 break;
-                    	}
+                    	//}
                 	} 
                 }
             
@@ -235,29 +238,38 @@ public class TypeLiteral<T> {
         return parameterized.getActualTypeArguments()[0];
     }
 
-    public static TypeLiteral create(Type valueType, Class<? extends JsonContext> viewClazz) {
+    public static TypeLiteral create(final Type valueType, final Class<? extends JsonContext> viewClazz) {
     	
-    	final Type type;
+    	//final Type type;
     	
-    	if(valueType instanceof ParameterizedTypeImpl)
-    	{
-    		ParameterizedTypeImpl pType = (ParameterizedTypeImpl)valueType;
-    		if( pType.hasJsonContext() )
-    		{
-    			viewClazz = null;
-    		}
-    	}
+//    	if(valueType instanceof ParameterizedTypeImpl)
+//    	{
+//    		ParameterizedTypeImpl pType = (ParameterizedTypeImpl)valueType;
+//    		if( pType.hasJsonContext() )
+//    		{
+//    			viewClazz = null;
+//    		}
+//    	}
     	
+    	 TypeLiteral typeLiteral = null;
+    	 
     	if(viewClazz != null)
     	{
-            type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
+    		typeLiteral = contextTypeLiteralCache.get(Pair.of(valueType, viewClazz));
+    		
+    		if(typeLiteral != null)
+    		{
+    			return typeLiteral;
+    		}
+    		
+          //  type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
     	}
-    	else
-    	{
-    		type = valueType;
-    	}
+//    	else
+//    	{
+//    		type = valueType;
+//    	}
     	 
-        TypeLiteral typeLiteral = typeLiteralCache.get(type);
+        typeLiteral = typeLiteralCache.get(valueType);
         if (typeLiteral != null) {
             return typeLiteral;
         }
@@ -284,7 +296,7 @@ public class TypeLiteral<T> {
     	
     	if(viewClazz != null)
     	{
-            type = new ParameterizedTypeImpl(new Type[]{viewClazz},null, valueType);
+            type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
     	}
     	else
     	{
@@ -302,6 +314,14 @@ public class TypeLiteral<T> {
         
         copy.put(type, typeLiteral);
         typeLiteralCache = copy;
+        
+        if(viewClazz != null)
+        {
+        	Map<Pair<Type,Class<? extends JsonContext>>,TypeLiteral> contextCopy = new HashMap<>(contextTypeLiteralCache);
+        	contextCopy.put(Pair.of(valueType, viewClazz), typeLiteral);
+        	contextTypeLiteralCache = contextCopy;
+        }
+        
         return typeLiteral;
     }
 

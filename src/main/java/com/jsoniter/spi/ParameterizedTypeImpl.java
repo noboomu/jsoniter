@@ -17,28 +17,28 @@ public class ParameterizedTypeImpl implements ParameterizedType {
         this.ownerType = ownerType;
         this.rawType = rawType;
         
-        if(rawType instanceof Class)
+        if(rawType instanceof JsonContext)
         {
-        	Class<?> clazz = (Class<?>)rawType;
-        	if(((JsonContext.class).isAssignableFrom(clazz)))
-        	{
+//        	Class<?> clazz = (Class<?>)rawType;
+//        	if(((JsonContext.class).isAssignableFrom(clazz)))
+//        	{
         		hasJsonContext = true;
         		return;
-        	}
+        	//}
         }
         
-        for( Type type : actualTypeArguments )
-        {
-        	   if(type instanceof Class)
-               {
-               	Class<?> clazz = (Class<?>)type;
-               	if(((JsonContext.class).isAssignableFrom(clazz)))
-               	{
-               		hasJsonContext = true;
-               		return;
-               	}
-               }
-        }
+//        for( Type type : actualTypeArguments )
+//        {
+//        	   if(type instanceof Class)
+//               {
+//               	Class<?> clazz = (Class<?>)type;
+//               	if(((JsonContext.class).isAssignableFrom(clazz)))
+//               	{
+//               		hasJsonContext = true;
+//               		return;
+//               	}
+//               }
+//        }
         
         hasJsonContext = false;
     }
