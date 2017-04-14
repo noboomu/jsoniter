@@ -251,11 +251,10 @@ public class TypeLiteral<T> {
 //    		}
 //    	}
     	
-    	 TypeLiteral typeLiteral = null;
-    	 
+     	 
     	if(viewClazz != null)
     	{
-    		typeLiteral = contextTypeLiteralCache.get(Pair.of(valueType, viewClazz));
+    		final TypeLiteral typeLiteral = contextTypeLiteralCache.get(Pair.of(valueType, viewClazz));
     		
     		if(typeLiteral != null)
     		{
@@ -269,7 +268,7 @@ public class TypeLiteral<T> {
 //    		type = valueType;
 //    	}
     	 
-        typeLiteral = typeLiteralCache.get(valueType);
+    	final TypeLiteral  typeLiteral = typeLiteralCache.get(valueType);
         if (typeLiteral != null) {
             return typeLiteral;
         }
@@ -278,9 +277,9 @@ public class TypeLiteral<T> {
         return createNew(valueType, viewClazz);
     }
     
-    public static TypeLiteral create( Type valueType ) {
+    public static TypeLiteral create( final Type valueType ) {
     	
-         TypeLiteral typeLiteral = typeLiteralCache.get(valueType );
+    	final TypeLiteral typeLiteral = typeLiteralCache.get(valueType );
         if (typeLiteral != null) {
             return typeLiteral;
         }
@@ -290,7 +289,7 @@ public class TypeLiteral<T> {
      
 
 
-    private synchronized static TypeLiteral createNew(Type valueType, Class<? extends JsonContext> viewClazz) {
+    private synchronized static TypeLiteral createNew(final Type valueType, final Class<? extends JsonContext> viewClazz) {
     	 
     	final Type type;
     	
@@ -303,12 +302,12 @@ public class TypeLiteral<T> {
     		type = valueType;
     	}
     	
-        TypeLiteral typeLiteral = typeLiteralCache.get(type);
-        if (typeLiteral != null) {
-            return typeLiteral;
-        }
-        HashMap<Type, TypeLiteral> copy = new HashMap<Type, TypeLiteral>(typeLiteralCache);
-        typeLiteral = new TypeLiteral(type,
+//        TypeLiteral typeLiteral = typeLiteralCache.get(type);
+//        if (typeLiteral != null) {
+//            return typeLiteral;
+//        }
+    	final HashMap<Type, TypeLiteral> copy = new HashMap<Type, TypeLiteral>(typeLiteralCache);
+    	final TypeLiteral typeLiteral = new TypeLiteral(type,
                 generateDecoderCacheKey(type),
                 generateEncoderCacheKey(type));
         
@@ -317,7 +316,7 @@ public class TypeLiteral<T> {
         
         if(viewClazz != null)
         {
-        	Map<Pair<Type,Class<? extends JsonContext>>,TypeLiteral> contextCopy = new HashMap<>(contextTypeLiteralCache);
+        	final Map<Pair<Type,Class<? extends JsonContext>>,TypeLiteral> contextCopy = new HashMap<>(contextTypeLiteralCache);
         	contextCopy.put(Pair.of(valueType, viewClazz), typeLiteral);
         	contextTypeLiteralCache = contextCopy;
         }

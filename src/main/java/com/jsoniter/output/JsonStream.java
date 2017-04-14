@@ -123,7 +123,7 @@ public class JsonStream extends OutputStream {
         count = 0;
     }
 
-    public final void writeVal(String val) throws IOException {
+    public final void writeVal(final String val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -131,23 +131,23 @@ public class JsonStream extends OutputStream {
         }
     }
 
-    public final void writeRaw(String val) throws IOException {
+    public final void writeRaw(final String val) throws IOException {
         writeRaw(val, val.length());
     }
 
-    public final void writeRaw(String val, int remaining) throws IOException {
+    public final void writeRaw(final String val, int remaining) throws IOException {
         int i = 0;
         for (; ; ) {
-            int available = buf.length - count;
+           final int available = buf.length - count;
             if (available < remaining) {
                 remaining -= available;
-                int j = i + available;
+                final int j = i + available;
                 val.getBytes(i, j, buf, count);
                 count = buf.length;
                 flushBuffer();
                 i = j;
             } else {
-                int j = i + remaining;
+            	final int j = i + remaining;
                 val.getBytes(i, j, buf, count);
                 count += remaining;
                 return;
@@ -155,7 +155,7 @@ public class JsonStream extends OutputStream {
         }
     }
 
-    public final void writeVal(Boolean val) throws IOException {
+    public final void writeVal(final Boolean val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -167,7 +167,7 @@ public class JsonStream extends OutputStream {
         }
     }
 
-    public final void writeVal(boolean val) throws IOException {
+    public final void writeVal(final boolean val) throws IOException {
         if (val) {
             writeTrue();
         } else {
@@ -183,7 +183,7 @@ public class JsonStream extends OutputStream {
         write((byte) 'f', (byte) 'a', (byte) 'l', (byte) 's', (byte) 'e');
     }
 
-    public final void writeVal(Short val) throws IOException {
+    public final void writeVal(final Short val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -195,7 +195,7 @@ public class JsonStream extends OutputStream {
         writeVal((int) val);
     }
 
-    public final void writeVal(Integer val) throws IOException {
+    public final void writeVal(final Integer val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -208,7 +208,7 @@ public class JsonStream extends OutputStream {
     }
 
 
-    public final void writeVal(Long val) throws IOException {
+    public final void writeVal(final Long val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -233,7 +233,7 @@ public class JsonStream extends OutputStream {
         StreamImplNumber.writeFloat(this, val);
     }
 
-    public final void writeVal(Double val) throws IOException {
+    public final void writeVal(final Double val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -276,12 +276,12 @@ public class JsonStream extends OutputStream {
         writeIndention(0);
     }
 
-    private void writeIndention(int delta) throws IOException {
+    private void writeIndention(final int delta) throws IOException {
         if (indention == 0) {
             return;
         }
         write('\n');
-        int toWrite = indention - delta;
+        final int toWrite = indention - delta;
         int i = 0;
         for (; ; ) {
             for (; i < toWrite && count < buf.length; i++) {
@@ -307,7 +307,7 @@ public class JsonStream extends OutputStream {
         writeIndention();
     }
 
-    public final void writeObjectField(String field) throws IOException {
+    public final void writeObjectField(final String field) throws IOException {
         writeVal(field);
         write(':');
     }
@@ -318,17 +318,17 @@ public class JsonStream extends OutputStream {
         write('}');
     }
 
-    public final void writeVal(Object obj) throws IOException {
+    public final void writeVal(final Object obj) throws IOException {
         if (obj == null) {
             writeNull();
             return;
         }
-        Class<?> clazz = obj.getClass();
-        String cacheKey = TypeLiteral.create(clazz).getEncoderCacheKey();
+        final Class<?> clazz = obj.getClass();
+        final String cacheKey = TypeLiteral.create(clazz).getEncoderCacheKey();
         Codegen.getEncoder(cacheKey, clazz,null).encode(obj, this);
     }
 
-    public final <T> void writeVal(TypeLiteral<T> typeLiteral, T obj) throws IOException {
+    public final <T> void writeVal(final TypeLiteral<T> typeLiteral, final T obj) throws IOException {
         if (null == obj) {
             writeNull();
         } else {
@@ -336,17 +336,17 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public final void writeViewVal(Object obj, Class<? extends JsonContext> viewClass) throws IOException {
+    public final void writeViewVal(final Object obj, final Class<? extends JsonContext> viewClass) throws IOException {
         if (obj == null) {
             writeNull();
             return;
         }
-        Class<?> clazz = obj.getClass();
-        String cacheKey = TypeLiteral.create(clazz,viewClass).getEncoderCacheKey();
+        final Class<?> clazz = obj.getClass();
+        final String cacheKey = TypeLiteral.create(clazz,viewClass).getEncoderCacheKey();
          Codegen.getEncoder(cacheKey, clazz,viewClass).encode(obj, this);
     }
 
-    public final <T> void writeViewVal(TypeLiteral<T> typeLiteral, T obj, Class<? extends JsonContext> viewClass) throws IOException {
+    public final <T> void writeViewVal(final TypeLiteral<T> typeLiteral, final T obj, final Class<? extends JsonContext> viewClass) throws IOException {
         if (null == obj) {
             writeNull();
         } else {
@@ -361,8 +361,8 @@ public class JsonStream extends OutputStream {
         }
     };
 
-    public static void serialize(Object obj, OutputStream out) {
-        JsonStream stream = tlsStream.get();
+    public static void serialize(final Object obj, final OutputStream out) {
+    	final JsonStream stream = tlsStream.get();
         try {
             try {
                 stream.reset(out);
@@ -375,8 +375,8 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public static void serialize(Object obj, Class<? extends JsonContext> viewClazz, OutputStream out) {
-        JsonStream stream = tlsStream.get();
+    public static void serialize(final Object obj, final Class<? extends JsonContext> viewClazz, final OutputStream out) {
+    	final JsonStream stream = tlsStream.get();
         try {
             try {
                 stream.reset(out);
