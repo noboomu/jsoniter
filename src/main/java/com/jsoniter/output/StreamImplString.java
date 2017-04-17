@@ -63,7 +63,7 @@ class StreamImplString {
             }
         }
         int n = stream.count;
-        stream.buf[n++] = '"';
+        stream.buf[n++] = JsonStream.QUOTE;
         // write string, the fast path, without utf8 and escape support
         for (; i < toWriteLen; i++) {
             char c = val.charAt(i);
@@ -78,7 +78,7 @@ class StreamImplString {
             }
         }
         if (i == valLen) {
-            stream.buf[n++] = '"';
+            stream.buf[n++] = JsonStream.QUOTE;
             stream.count = n;
             return;
         }
@@ -90,9 +90,9 @@ class StreamImplString {
 
     public static final void writeStringWithoutQuote(final JsonStream stream, final String val) throws IOException {
         int i = 0;
-        int valLen = val.length();
+        final int valLen = val.length();
         int toWriteLen = valLen;
-        int bufLen = stream.buf.length;
+        final int bufLen = stream.buf.length;
         if (stream.count + toWriteLen > bufLen) {
             toWriteLen = bufLen - stream.count;
         }
@@ -106,7 +106,7 @@ class StreamImplString {
         // write string, the fast path, without utf8 and escape support
         for (; i < toWriteLen; i++) {
             char c = val.charAt(i);
-            if (c > 31 && c != '"' && c != '\\' && c < 126) {
+            if (c > 31 && c != JsonStream.QUOTE && c != JsonStream.ESCAPE && c < 126) {
                 stream.buf[n++] = (byte) c;
             } else {
                 break;
@@ -121,37 +121,37 @@ class StreamImplString {
         writeStringSlowPath(stream, val, i, valLen);
     }
 
-    private static void writeStringSlowPath(JsonStream stream, String val, int i, int valLen) throws IOException {
+    private static void writeStringSlowPath(final JsonStream stream, final String val,  int i, final int valLen) throws IOException {
         for (; i < valLen; i++) {
-            int c = val.charAt(i);
+        	final int c = val.charAt(i);
             if (c > 125) {
                 byte b4 = (byte) (c & 0xf);
                 byte b3 = (byte) (c >> 4 & 0xf);
                 byte b2 = (byte) (c >> 8 & 0xf);
                 byte b1 = (byte) (c >> 12 & 0xf);
-                stream.write((byte) '\\', (byte) 'u', ITOA[b1], ITOA[b2], ITOA[b3], ITOA[b4]);
+                stream.write((byte)  JsonStream.ESCAPE, JsonStream.UNICODE, ITOA[b1], ITOA[b2], ITOA[b3], ITOA[b4]);
             } else {
                 switch (c) {
-                    case '"':
-                        stream.write((byte) '\\', (byte) '"');
+                    case JsonStream.QUOTE:
+                        stream.write( JsonStream.ESCAPE, JsonStream.QUOTE);
                         break;
-                    case '\\':
-                        stream.write((byte) '\\', (byte) '\\');
+                    case JsonStream.ESCAPE:
+                        stream.write(JsonStream.ESCAPE, JsonStream.ESCAPE);
                         break;
-                    case '\b':
-                        stream.write((byte) '\\', (byte) 'b');
+                    case JsonStream.BACKSPACE:
+                        stream.write(JsonStream.ESCAPE_BACKSPACE);
                         break;
-                    case '\f':
-                        stream.write((byte) '\\', (byte) 'f');
+                    case JsonStream.FORMFEED:
+                        stream.write(JsonStream.ESCAPE_FORMFEED);
                         break;
-                    case '\n':
-                        stream.write((byte) '\\', (byte) 'n');
+                    case JsonStream.NEWLINE:
+                        stream.write(JsonStream.ESCAPE_NEWLINE);
                         break;
-                    case '\r':
-                        stream.write((byte) '\\', (byte) 'r');
+                    case JsonStream.CARRAIGE_RETURN:
+                        stream.write(JsonStream.ESCAPE_CARRIAGE_RETURN);
                         break;
-                    case '\t':
-                        stream.write((byte) '\\', (byte) 't');
+                    case JsonStream.TAB:
+                        stream.write(JsonStream.ESCAPE_TAB);
                         break;
                     default:
                         stream.write(c);

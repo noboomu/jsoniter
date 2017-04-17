@@ -11,18 +11,33 @@ import java.util.Arrays;
 
 public class JsonStream extends OutputStream {
 
-	
+	public static final byte ESCAPE = '\\';
+
 	public static final byte OBJECT_START = '{';
 	public static final byte OBJECT_END = '}';
 	public static final byte ARRAY_START = '[';
 	public static final byte ARRAY_END = ']';
 	public static final byte COMMA = ',';
-	public static final byte SEMI = ':';
-	public static final byte NEWLINE = '\n'; 
+	public static final byte SEMI = ':'; 
 	public static final byte SPACE = ' '; 
 	public static final byte QUOTE = '"';
-	public static final byte ESCAPE = '\\';
-	public static final byte[] NULL = new byte[]{(byte) 'n', (byte) 'u', (byte) 'l', (byte) 'l'};
+	public static final byte UNICODE = 'u';
+	public static final byte NEWLINE = '\n';
+	public static final byte BACKSPACE = '\b';
+	public static final byte TAB = '\t';
+	public static final byte CARRAIGE_RETURN = '\r';
+	public static final byte FORMFEED = '\f';
+	public static final byte MINUS = '-';
+	public static final byte ZERO = '0';
+	public static final byte PERIOD = '.';
+
+	public static final byte[] ESCAPE_BACKSPACE = new byte[]{ESCAPE, (byte)'b'};
+	public static final byte[] ESCAPE_NEWLINE = new byte[]{ESCAPE, (byte)'n'};
+	public static final byte[] ESCAPE_TAB = new byte[]{ESCAPE, (byte)'t'};
+	public static final byte[] ESCAPE_FORMFEED = new byte[]{ESCAPE, (byte)'f'};
+	public static final byte[] ESCAPE_CARRIAGE_RETURN = new byte[]{ESCAPE, (byte)'r'};
+
+ 	public static final byte[] NULL = new byte[]{(byte) 'n', (byte) 'u', (byte) 'l', (byte) 'l'};
 	public static final byte[] TRUE = new byte[]{(byte) 't', (byte) 'r', (byte) 'u', (byte) 'e'};
 	public static final byte[] FALSE = new byte[]{(byte) 'f', (byte) 'a', (byte) 'l', (byte) 's', (byte) 'e'};
 

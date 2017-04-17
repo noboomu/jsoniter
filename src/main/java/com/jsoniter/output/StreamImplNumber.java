@@ -40,9 +40,9 @@ class StreamImplNumber {
     static {
         for (int i = 0; i < 1000; i++) {
             DIGITS[i] = (i < 10 ? (2 << 24) : i < 100 ? (1 << 24) : 0)
-                    + (((i / 100) + '0') << 16)
-                    + ((((i / 10) % 10) + '0') << 8)
-                    + i % 10 + '0';
+                    + (((i / 100) + JsonStream.ZERO) << 16)
+                    + ((((i / 10) % 10) + JsonStream.ZERO) << 8)
+                    + i % 10 + JsonStream.ZERO;
         }
     }
 
@@ -61,7 +61,7 @@ class StreamImplNumber {
                 return;
             }
             value = -value;
-            buf[pos++] = '-';
+            buf[pos++] = JsonStream.MINUS;
         }
         final int q1 = value / 1000;
         if (q1 == 0) {
@@ -87,7 +87,7 @@ class StreamImplNumber {
             pos += writeFirstBuf(buf, DIGITS[q2], pos);
         } else {
             final int r3 = (int) (q2 - q3 * 1000);
-            buf[pos++] = (byte) (q3 + '0');
+            buf[pos++] = (byte) (q3 +  JsonStream.ZERO);
             writeBuf(buf, DIGITS[r3], pos);
             pos += 3;
         }
@@ -108,7 +108,7 @@ class StreamImplNumber {
         return 3 - start;
     }
 
-    private static void writeBuf(final byte[] buf, final int v, int pos) {
+    private static void writeBuf(final byte[] buf, final int v, final int pos) {
         buf[pos] = (byte) (v >> 16);
         buf[pos + 1] = (byte) (v >> 8);
         buf[pos + 2] = (byte) v;
@@ -120,7 +120,7 @@ class StreamImplNumber {
         if (stream.buf.length - stream.count < 21) {
             stream.flushBuffer();
         }
-        byte[] buf = stream.buf;
+        final byte[] buf = stream.buf;
         int pos = stream.count;
         if (value < 0) {
             if (value == Long.MIN_VALUE) {
@@ -129,7 +129,7 @@ class StreamImplNumber {
                 return;
             }
             value = -value;
-            buf[pos++] = '-';
+            buf[pos++] = JsonStream.MINUS;
         }
         final long q1 = value / 1000;
         if (q1 == 0) {
@@ -200,7 +200,7 @@ class StreamImplNumber {
             pos += writeFirstBuf(buf, DIGITS[q5], pos);
         } else {
             final int r6 = q5 - q6 * 1000;
-            buf[pos++] = (byte) (q6 + '0');
+            buf[pos++] = (byte) (q6 + JsonStream.ZERO);
             writeBuf(buf, DIGITS[r6], pos);
             pos += 3;
         }
@@ -214,7 +214,7 @@ class StreamImplNumber {
 
     private static final int POW10[] = {1, 10, 100, 1000, 10000, 100000, 1000000};
 
-    public static final void writeFloat(JsonStream stream, float val) throws IOException {
+    public static final void writeFloat(final JsonStream stream, float val) throws IOException {
         if (val < 0) {
             stream.write('-');
             val = -val;
@@ -223,53 +223,53 @@ class StreamImplNumber {
             stream.writeRaw(Float.toString(val));
             return;
         }
-        int precision = 6;
-        int exp = 1000000; // 6
-        long lval = (long)(val * exp + 0.5);
+        final int precision = 6;
+        final int exp = 1000000; // 6
+        final long lval = (long)(val * exp + 0.5);
         stream.writeVal(lval / exp);
-        long fval = lval % exp;
+        final long fval = lval % exp;
         if (fval == 0) {
             return;
         }
-        stream.write('.');
+        stream.write(JsonStream.PERIOD);
         if (stream.buf.length - stream.count < 10) {
             stream.flushBuffer();
         }
         for (int p = precision - 1; p > 0 && fval < POW10[p]; p--) {
-            stream.buf[stream.count++] = '0';
+            stream.buf[stream.count++] = JsonStream.ZERO;
         }
         stream.writeVal(fval);
-        while(stream.buf[stream.count-1] == '0') {
+        while(stream.buf[stream.count-1] == JsonStream.ZERO) {
             stream.count--;
         }
     }
 
-    public static final void writeDouble(JsonStream stream, double val) throws IOException {
+    public static final void writeDouble(final JsonStream stream, double val) throws IOException {
         if (val < 0) {
             val = -val;
-            stream.write('-');
+            stream.write(JsonStream.MINUS);
         }
         if (val > 0x4ffffff) {
             stream.writeRaw(Double.toString(val));
             return;
         }
-        int precision = 6;
-        int exp = 1000000; // 6
-        long lval = (long)(val * exp + 0.5);
+        final int precision = 6;
+        final int exp = 1000000; // 6
+        final long lval = (long)(val * exp + 0.5);
         stream.writeVal(lval / exp);
-        long fval = lval % exp;
+        final long fval = lval % exp;
         if (fval == 0) {
             return;
         }
-        stream.write('.');
+        stream.write(JsonStream.PERIOD);
         if (stream.buf.length - stream.count < 10) {
             stream.flushBuffer();
         }
         for (int p = precision - 1; p > 0 && fval < POW10[p]; p--) {
-            stream.buf[stream.count++] = '0';
+            stream.buf[stream.count++] = JsonStream.ZERO;
         }
         stream.writeVal(fval);
-        while(stream.buf[stream.count-1] == '0') {
+        while(stream.buf[stream.count-1] == JsonStream.ZERO) {
             stream.count--;
         }
     }

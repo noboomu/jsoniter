@@ -80,8 +80,6 @@ public class CodegenImplArray {
     	
     	Class<?> compTypeClazz = (Class<?>) compType;
 
-    	System.out.println("genList for " + clazz + " with compType: " + compTypeClazz);
-    	
          boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;
@@ -92,7 +90,7 @@ public class CodegenImplArray {
         ctx.append("int size = list.size();");
         ctx.append("if (size == 0) { return; }");
         ctx.buffer('[');
-        ctx.append( compTypeClazz.getName() + " e = list.get(0);");
+        ctx.append( compTypeClazz.getName() + " e = (" + compTypeClazz.getName() + ") list.get(0);");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
             CodegenImplNative.genWriteOp(ctx, "e", compType,  viewClazz, true);
@@ -102,7 +100,7 @@ public class CodegenImplArray {
         }
         ctx.append("for (int i = 1; i < size; i++) {");
         ctx.append("stream.writeByte(com.jsoniter.output.JsonStream.COMMA);");
-        ctx.append("e = list.get(i);");
+        ctx.append("e = (" + compTypeClazz.getName() + ") list.get(i);");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
             CodegenImplNative.genWriteOp(ctx, "e", compType,  viewClazz, true);
