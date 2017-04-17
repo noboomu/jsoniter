@@ -7,8 +7,25 @@ import com.jsoniter.spi.TypeLiteral;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class JsonStream extends OutputStream {
+
+	
+	public static final byte OBJECT_START = '{';
+	public static final byte OBJECT_END = '}';
+	public static final byte ARRAY_START = '[';
+	public static final byte ARRAY_END = ']';
+	public static final byte COMMA = ',';
+	public static final byte SEMI = ':';
+	public static final byte NEWLINE = '\n'; 
+	public static final byte SPACE = ' '; 
+	public static final byte QUOTE = '"';
+	public static final byte ESCAPE = '\\';
+	public static final byte[] NULL = new byte[]{(byte) 'n', (byte) 'u', (byte) 'l', (byte) 'l'};
+	public static final byte[] TRUE = new byte[]{(byte) 't', (byte) 'r', (byte) 'u', (byte) 'e'};
+	public static final byte[] FALSE = new byte[]{(byte) 'f', (byte) 'a', (byte) 'l', (byte) 's', (byte) 'e'};
+
 
     public static int defaultIndentionStep = 0;
     public int indentionStep = defaultIndentionStep;
@@ -37,6 +54,13 @@ public class JsonStream extends OutputStream {
         buf[count++] = (byte) b;
     }
 
+    public final void writeByte(byte b) throws IOException { 
+    	 if (count >= buf.length - 1) {
+             flushBuffer();
+         }
+        buf[count++] = b;
+    }
+    
     public final void write(byte b1, byte b2) throws IOException {
         if (count >= buf.length - 1) {
             flushBuffer();
@@ -166,6 +190,18 @@ public class JsonStream extends OutputStream {
             }
         }
     }
+    
+    public final void writeBoolean(final Boolean val) throws IOException {
+        if (val == null) {
+            writeNull();
+        } else {
+            if (val) {
+                writeTrue();
+            } else {
+                writeFalse();
+            }
+        }
+    }
 
     public final void writeVal(final boolean val) throws IOException {
         if (val) {
@@ -176,11 +212,11 @@ public class JsonStream extends OutputStream {
     }
 
     public final void writeTrue() throws IOException {
-        write((byte) 't', (byte) 'r', (byte) 'u', (byte) 'e');
+        write(TRUE);
     }
 
     public final void writeFalse() throws IOException {
-        write((byte) 'f', (byte) 'a', (byte) 'l', (byte) 's', (byte) 'e');
+        write(FALSE);
     }
 
     public final void writeVal(final Short val) throws IOException {
@@ -215,6 +251,16 @@ public class JsonStream extends OutputStream {
             writeVal(val.longValue());
         }
     }
+    
+    public final void writeLong(Long val) throws IOException {
+    	  if (val == null) {
+              writeNull();
+          }
+    	  else
+    	  {
+    	     StreamImplNumber.writeLong(this, val); 
+    	  }
+    }
 
     public final void writeVal(long val) throws IOException {
         StreamImplNumber.writeLong(this, val);
@@ -222,6 +268,15 @@ public class JsonStream extends OutputStream {
 
 
     public final void writeVal(Float val) throws IOException {
+        if (val == null) {
+            writeNull();
+        } else {
+            writeVal(val.floatValue());
+        }
+    }
+    
+
+    public final void writeFloat(Float val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -240,6 +295,18 @@ public class JsonStream extends OutputStream {
             writeVal(val.doubleValue());
         }
     }
+    
+    
+    
+    public final void writeDouble(Double val) throws IOException {
+    	if (val == null) {
+            writeNull();
+        } else {
+        	
+            StreamImplNumber.writeDouble(this, val);
+
+        }
+     }
 
     public final void writeVal(double val) throws IOException {
         StreamImplNumber.writeDouble(this, val);
@@ -250,25 +317,25 @@ public class JsonStream extends OutputStream {
     }
 
     public final void writeNull() throws IOException {
-        write((byte) 'n', (byte) 'u', (byte) 'l', (byte) 'l');
+        write(NULL);
     }
 
     public final void writeEmptyObject() throws IOException {
-        write((byte) '{', (byte) '}');
+        write(JsonStream.OBJECT_START, JsonStream.OBJECT_END);
     }
 
     public final void writeEmptyArray() throws IOException {
-        write((byte) '[', (byte) ']');
+        write(JsonStream.ARRAY_START, JsonStream.ARRAY_END);
     }
 
     public final void writeArrayStart() throws IOException {
         indention += indentionStep;
-        write('[');
+        write(JsonStream.ARRAY_START);
         writeIndention();
     }
 
     public final void writeMore() throws IOException {
-        write(',');
+        write(JsonStream.COMMA);
         writeIndention();
     }
 
@@ -280,12 +347,12 @@ public class JsonStream extends OutputStream {
         if (indention == 0) {
             return;
         }
-        write('\n');
+        write(NEWLINE);
         final int toWrite = indention - delta;
         int i = 0;
         for (; ; ) {
             for (; i < toWrite && count < buf.length; i++) {
-                buf[count++] = ' ';
+                buf[count++] = SPACE;
             }
             if (i == toWrite) {
                 break;
@@ -298,24 +365,24 @@ public class JsonStream extends OutputStream {
     public final void writeArrayEnd() throws IOException {
         writeIndention(indentionStep);
         indention -= indentionStep;
-        write(']');
+        write(ARRAY_END);
     }
 
     public final void writeObjectStart() throws IOException {
         indention += indentionStep;
-        write('{');
+        write(OBJECT_START);
         writeIndention();
     }
 
     public final void writeObjectField(final String field) throws IOException {
         writeVal(field);
-        write(':');
+        write(SEMI);
     }
 
     public final void writeObjectEnd() throws IOException {
         writeIndention(indentionStep);
         indention -= indentionStep;
-        write('}');
+        write(OBJECT_END);
     }
 
     public final void writeVal(final Object obj) throws IOException {

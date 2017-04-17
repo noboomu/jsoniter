@@ -12,7 +12,7 @@ public interface Encoder {
 
     Any wrap(Object obj);
 
-    abstract class BooleanEncoder implements Encoder {
+    public abstract class BooleanEncoder implements Encoder {
         @Override
         public void encode(Object obj, JsonStream stream) throws IOException {
             encodeBoolean((Boolean) obj, stream);
@@ -21,7 +21,7 @@ public interface Encoder {
         public abstract void encodeBoolean(boolean obj, JsonStream stream) throws IOException;
     }
 
-    abstract class ShortEncoder implements Encoder {
+    public abstract class ShortEncoder implements Encoder {
 
         @Override
         public void encode(Object obj, JsonStream stream) throws IOException {
@@ -37,7 +37,7 @@ public interface Encoder {
         public abstract void encodeShort(short obj, JsonStream stream) throws IOException;
     }
 
-    class StringShortEncoder extends ShortEncoder {
+    public class StringShortEncoder extends ShortEncoder {
 
         @Override
         public void encodeShort(short obj, JsonStream stream) throws IOException {
@@ -47,7 +47,7 @@ public interface Encoder {
         }
     }
 
-    abstract class IntEncoder implements Encoder {
+    public abstract class IntEncoder implements Encoder {
         @Override
         public void encode(Object obj, JsonStream stream) throws IOException {
             encodeInt((Integer) obj, stream);
@@ -62,7 +62,7 @@ public interface Encoder {
         public abstract void encodeInt(int obj, JsonStream stream) throws IOException;
     }
 
-    class StringIntEncoder extends IntEncoder {
+    public class StringIntEncoder extends IntEncoder {
 
         @Override
         public void encodeInt(int obj, JsonStream stream) throws IOException {
@@ -72,7 +72,7 @@ public interface Encoder {
         }
     }
 
-    abstract class LongEncoder implements Encoder {
+    public abstract class LongEncoder implements Encoder {
         @Override
         public void encode(Object obj, JsonStream stream) throws IOException {
             encodeLong((Long) obj, stream);
@@ -87,7 +87,7 @@ public interface Encoder {
         public abstract void encodeLong(long obj, JsonStream stream) throws IOException;
     }
 
-    class StringLongEncoder extends LongEncoder {
+    public class StringLongEncoder extends LongEncoder {
 
         @Override
         public void encodeLong(long obj, JsonStream stream) throws IOException {
@@ -97,7 +97,7 @@ public interface Encoder {
         }
     }
 
-    abstract class FloatEncoder implements Encoder {
+    public abstract class FloatEncoder implements Encoder {
         @Override
         public void encode(Object obj, JsonStream stream) throws IOException {
             encodeFloat((Float) obj, stream);
@@ -112,7 +112,7 @@ public interface Encoder {
         public abstract void encodeFloat(float obj, JsonStream stream) throws IOException;
     }
 
-    class StringFloatEncoder extends FloatEncoder {
+    public class StringFloatEncoder extends FloatEncoder {
 
         @Override
         public void encodeFloat(float obj, JsonStream stream) throws IOException {
@@ -122,7 +122,7 @@ public interface Encoder {
         }
     }
 
-    abstract class DoubleEncoder implements Encoder {
+    public abstract class DoubleEncoder implements Encoder {
         @Override
         public void encode(Object obj, JsonStream stream) throws IOException {
             encodeDouble((Double) obj, stream);
@@ -137,7 +137,7 @@ public interface Encoder {
         public abstract void encodeDouble(double obj, JsonStream stream) throws IOException;
     }
 
-    class StringDoubleEncoder extends DoubleEncoder {
+    public class StringDoubleEncoder extends DoubleEncoder {
 
         @Override
         public void encodeDouble(double obj, JsonStream stream) throws IOException {

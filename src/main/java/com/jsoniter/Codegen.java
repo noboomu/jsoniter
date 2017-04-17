@@ -120,8 +120,7 @@ class Codegen {
             clazz = (Class) type;
         }
         Class implClazz = JsoniterSpi.getTypeImplementation(clazz);
-        System.out.println("implClazz: " + implClazz);
-        if (Collection.class.isAssignableFrom(clazz)) {
+         if (Collection.class.isAssignableFrom(clazz)) {
             Type compType = Object.class;
             if (typeArgs.length == 0) {
                 // default to List<Object>

@@ -12,7 +12,33 @@ public class CodegenResult {
             return "";
         }
         if (buffered.length() == 1) {
-            return String.format("stream.write((byte)'%s');", escape(buffered.charAt(0)));
+        	
+        	if( buffered.charAt(0) == ',')
+        	{
+        		return "stream.writeByte(com.jsoniter.output.JsonStream.COMMA);";
+        	}
+        	else if( buffered.charAt(0) == '{')
+        	{
+        		return "stream.writeByte(com.jsoniter.output.JsonStream.OBJECT_START);";
+        	}
+        	else if( buffered.charAt(0) == '}')
+        	{
+        		return "stream.writeByte(com.jsoniter.output.JsonStream.OBJECT_END);";
+        	}
+        	else if( buffered.charAt(0) == '[')
+        	{
+        		return "stream.writeByte(com.jsoniter.output.JsonStream.ARRAY_START);";
+        	}
+        	else if( buffered.charAt(0) == ']')
+        	{
+        		return "stream.writeByte(com.jsoniter.output.JsonStream.ARRAY_END);";
+        	}
+        	else if( buffered.charAt(0) == ':')
+        	{
+        		return "stream.writeByte(com.jsoniter.output.JsonStream.SEMI);";
+        	}
+        	
+            return String.format("stream.writeByte('%s');", escape(buffered.charAt(0)));
         } else if (buffered.length() == 2) {
             return String.format("stream.write((byte)'%s', (byte)'%s');",
                     escape(buffered.charAt(0)), escape(buffered.charAt(1)));

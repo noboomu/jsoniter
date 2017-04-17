@@ -169,7 +169,7 @@ public class CodegenImplObject {
         if (notFirst == 1) { // definitely not first
             ctx.buffer(',');
         } else if (notFirst == 2) { // maybe not first, previous field is omitNull
-            ctx.append("if (notFirst) { stream.write(','); } else { notFirst = true; }");
+            ctx.append("if (notFirst) { stream.write(com.jsoniter.output.JsonStream.COMMA); } else { notFirst = true; }");
         } else { // this is the first, do not write comma
             notFirst = 1;
         }

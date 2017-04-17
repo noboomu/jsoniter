@@ -1,9 +1,5 @@
 package com.jsoniter.output;
 
-import com.jsoniter.spi.JsonException;
-import com.jsoniter.any.Any;
-import com.jsoniter.spi.*;
-
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -12,6 +8,12 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+
+import com.jsoniter.any.Any;
+import com.jsoniter.spi.Encoder;
+import com.jsoniter.spi.JsonException;
+import com.jsoniter.spi.JsoniterSpi;
+import com.jsoniter.spi.TypeLiteral;
 
 public class CodegenImplNative {
     public static final Map<Type, Encoder> NATIVE_ENCODERS = new IdentityHashMap<Type, Encoder>() {{
@@ -280,8 +282,37 @@ public class CodegenImplNative {
                 ctx.buffer('"');
                 return;
             }
-            if (NATIVE_ENCODERS.containsKey(type)) {
-                ctx.append(String.format("stream.writeVal((%s)%s);", getTypeName(type), code));
+            if (NATIVE_ENCODERS.containsKey(type)) 
+            {
+            	if( type.getTypeName().equals("java.lang.Long"))
+            	{
+            		ctx.append(String.format("stream.writeLong(%s);", code));
+
+            	}
+            	else if( type.getTypeName().equals("java.lang.Double"))
+            	{
+            		ctx.append(String.format("stream.writeDouble(%s);", code));
+
+            	}
+            	else if( type.getTypeName().equals("java.lang.Float"))
+            	{
+            		ctx.append(String.format("stream.writeFloat(%s);", code));
+
+            	}
+            	else if( type.getTypeName().equals("java.lang.Boolean"))
+            	{
+            		ctx.append(String.format("stream.writeBool(%s);", code));
+
+            	}
+            	else if( type.getTypeName().equals("java.lang.String"))
+            	{
+            		ctx.append(String.format("stream.writeVal(%s);", code));
+
+            	}
+            	else
+            	{
+            		ctx.append(String.format("stream.writeVal((%s)%s);", getTypeName(type), code));
+            	}
                 return;
             }
         }

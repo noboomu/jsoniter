@@ -35,7 +35,7 @@ public class CodegenImplArray {
             CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, false);
         }
         ctx.append("while (i < arr.length) {");
-        ctx.append("stream.write(',');");
+        ctx.append("stream.writeByte(com.jsonier.output.JsonStream.COMMA);");
         ctx.append("e = arr[i++];");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
@@ -77,7 +77,12 @@ public class CodegenImplArray {
     }
 
     private static CodegenResult genList(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz, Type compType) {
-        boolean isCollectionValueNullable = true;
+    	
+    	Class<?> compTypeClazz = (Class<?>) compType;
+
+    	System.out.println("genList for " + clazz + " with compType: " + compTypeClazz);
+    	
+         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;
         }
@@ -87,7 +92,7 @@ public class CodegenImplArray {
         ctx.append("int size = list.size();");
         ctx.append("if (size == 0) { return; }");
         ctx.buffer('[');
-        ctx.append("java.lang.Object e = list.get(0);");
+        ctx.append( compTypeClazz.getName() + " e = list.get(0);");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
             CodegenImplNative.genWriteOp(ctx, "e", compType,  viewClazz, true);
@@ -96,7 +101,7 @@ public class CodegenImplArray {
             CodegenImplNative.genWriteOp(ctx, "e", compType,   viewClazz,false);
         }
         ctx.append("for (int i = 1; i < size; i++) {");
-        ctx.append("stream.write(',');");
+        ctx.append("stream.writeByte(com.jsoniter.output.JsonStream.COMMA);");
         ctx.append("e = list.get(i);");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
@@ -131,7 +136,7 @@ public class CodegenImplArray {
             CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, false);
         }
         ctx.append("while (iter.hasNext()) {");
-        ctx.append("stream.write(',');");
+        ctx.append("stream.writeByte(com.jsoniter.output.JsonStream.COMMA);");
         ctx.append("e = iter.next();");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
