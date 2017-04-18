@@ -31,8 +31,8 @@ class DynamicCodegen {
         }
         
      
-        System.out.println(cacheKey +"\n:" + cacheKey);
-        CtMethod interfaceMethod = CtNewMethod.make(wrapperCode, ctClass);
+         CtMethod interfaceMethod = CtNewMethod.make(wrapperCode, ctClass);
+ 
         ctClass.addMethod(interfaceMethod);
         return (Encoder) ctClass.toClass().newInstance();
     }
@@ -62,8 +62,7 @@ class DynamicCodegen {
         CtMethod interfaceMethod = CtNewMethod.make(wrapperCode, ctClass);
         ctClass.addMethod(interfaceMethod);
         
-        System.out.println(cacheKey +"\n:" + cacheKey);
-        System.out.println(staticCode);
+      
         return (Encoder) ctClass.toClass().newInstance();
     }
 }

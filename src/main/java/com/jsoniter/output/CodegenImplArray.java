@@ -8,8 +8,7 @@ public class CodegenImplArray {
     public static CodegenResult genArray(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz) {
         Class compType = clazz.getComponentType();
         
-        System.out.println("genArray: " + clazz + " view: " + viewClazz + " cacheKey: " + cacheKey + " compType: " + compType);
-        
+         
         if (compType.isArray()) {
             throw new IllegalArgumentException("nested array not supported: " + clazz.getCanonicalName());
         }
@@ -35,7 +34,7 @@ public class CodegenImplArray {
             CodegenImplNative.genWriteOp(ctx, "e", compType,viewClazz, false);
         }
         ctx.append("while (i < arr.length) {");
-        ctx.append("stream.writeByte(com.jsonier.output.JsonStream.COMMA);");
+        ctx.append("stream.writeByte(com.jsoniter.output.JsonStream.COMMA);");
         ctx.append("e = arr[i++];");
         if (isCollectionValueNullable) {
             ctx.append("if (e == null) { stream.writeNull(); } else {");
@@ -52,7 +51,7 @@ public class CodegenImplArray {
 
     public static CodegenResult genCollection(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz, Type[] typeArgs) {
     	
-    	
+ 
         Type compType = Object.class;
          
         if (typeArgs.length == 0) {
@@ -78,6 +77,7 @@ public class CodegenImplArray {
 
     private static CodegenResult genList(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz, Type compType) {
     	
+ 
     	Class<?> compTypeClazz = (Class<?>) compType;
 
          boolean isCollectionValueNullable = true;

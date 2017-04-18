@@ -85,7 +85,7 @@ class StreamImplString {
         stream.count = n;
         // for the remaining parts, we process them char by char
         writeStringSlowPath(stream, val, i, valLen);
-        stream.write('"');
+        stream.write(JsonStream.QUOTE);
     }
 
     public static final void writeStringWithoutQuote(final JsonStream stream, final String val) throws IOException {

@@ -169,6 +169,14 @@ public class JsonStream extends OutputStream {
             StreamImplString.writeString(this, val);
         }
     }
+    
+    public final void writeString(final String val) throws IOException {
+//        if (val == null) {
+//            writeNull();
+//        } else {
+            StreamImplString.writeString(this, val);
+      //  }
+    }
 
     public final void writeRaw(final String val) throws IOException {
         writeRaw(val, val.length());
