@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 
 public class CodegenImplMap {
-    public static CodegenResult genMap(String cacheKey, Class clazz,Class<? extends JsonContext> viewClazz, Type[] typeArgs) {
+    public static CodegenResult genMap(String cacheKey, Class<?> clazz,Class<? extends JsonContext> viewClazz, Type[] typeArgs) {
         boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {
             isCollectionValueNullable = false;

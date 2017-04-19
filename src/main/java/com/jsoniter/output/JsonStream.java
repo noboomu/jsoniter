@@ -5,6 +5,7 @@ import com.jsoniter.any.Any;
 import com.jsoniter.spi.Encoder;
 import com.jsoniter.spi.TypeLiteral;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -56,12 +57,20 @@ public class JsonStream extends OutputStream {
         this.out = out;
         this.buf = new byte[bufSize];
     }
+    
+//    public JsonStream(int bufSize) {
+//        if (bufSize < 32) {
+//            throw new JsonException("buffer size must be larger than 32: " + bufSize);
+//        }
+//        this.out = new ByteArrayOutputStream(bufSize);
+//        this.buf = new byte[bufSize];
+//    }
 
     public void reset(OutputStream out) {
         this.out = out;
         this.count = 0;
     }
-
+    
     public final void write(int b) throws IOException {
         if (count == buf.length) {
             flushBuffer();
@@ -408,7 +417,7 @@ public class JsonStream extends OutputStream {
         write(OBJECT_END);
     }
 
-    public final void writeVal(final Object obj) throws IOException {
+    public final <T> void writeVal(final T obj) throws IOException {
         if (obj == null) {
             writeNull();
             return;
@@ -426,7 +435,7 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public final void writeViewVal(final Object obj, final Class<? extends JsonContext> viewClass) throws IOException {
+    public final <T> void writeViewVal(final T obj, final Class<? extends JsonContext> viewClass) throws IOException {
         if (obj == null) {
             writeNull();
             return;
@@ -451,7 +460,7 @@ public class JsonStream extends OutputStream {
         }
     };
 
-    public static void serialize(final Object obj, final OutputStream out) {
+    public static <T> void  serialize(final T obj, final OutputStream out) {
     	final JsonStream stream = tlsStream.get();
         try {
             try {
@@ -465,7 +474,7 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public static void serialize(final Object obj, final Class<? extends JsonContext> viewClazz, final OutputStream out) {
+    public static  <T> void serialize(final T obj, final Class<? extends JsonContext> viewClazz, final OutputStream out) {
     	final JsonStream stream = tlsStream.get();
         try {
             try {
@@ -486,7 +495,7 @@ public class JsonStream extends OutputStream {
         }
     };
     
-    public static String serialize(Object obj,Class<? extends JsonContext> viewClazz) {
+    public static <T> String serialize(T obj,Class<? extends JsonContext> viewClazz) {
         AsciiOutputStream asciiOutputStream = tlsAsciiOutputStream.get();
         asciiOutputStream.reset();
         serialize(obj, viewClazz, asciiOutputStream);
@@ -504,7 +513,15 @@ public class JsonStream extends OutputStream {
         Codegen.setMode(mode);
     }
 
-    public static void registerNativeEncoder(Class clazz, Encoder encoder) {
+    public static void registerNativeEncoder(Class<?> clazz, Encoder encoder) {
         CodegenImplNative.NATIVE_ENCODERS.put(clazz, encoder);
+    }
+    
+    public  String toString() {
+        return new String(buf, 0, count);
+    }
+    
+    public  byte toByteArray()[] {
+        return Arrays.copyOf(buf, count);
     }
 }

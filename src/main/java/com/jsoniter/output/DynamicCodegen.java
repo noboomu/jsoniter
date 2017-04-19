@@ -15,7 +15,7 @@ class DynamicCodegen {
         pool.insertClassPath(new ClassClassPath(Encoder.class));
     }
 
-    public static Encoder gen(Class clazz, String cacheKey, CodegenResult source) throws Exception {
+    public static Encoder gen(Class<?> clazz, String cacheKey, CodegenResult source) throws Exception {
         source.flushBuffer();
         CtClass ctClass = pool.makeClass(cacheKey);
         ctClass.setInterfaces(new CtClass[]{pool.get(Encoder.class.getName())});
@@ -37,7 +37,7 @@ class DynamicCodegen {
         return (Encoder) ctClass.toClass().newInstance();
     }
     
-    public static Encoder gen(Class clazz, Class<? extends JsonContext> viewClazz, String cacheKey, CodegenResult source) throws Exception {
+    public static Encoder gen(Class<?> clazz, Class<? extends JsonContext> viewClazz, String cacheKey, CodegenResult source) throws Exception {
      
     	if(viewClazz == null)
     	{

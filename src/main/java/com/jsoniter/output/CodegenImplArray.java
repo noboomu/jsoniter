@@ -78,7 +78,7 @@ public class CodegenImplArray {
     private static CodegenResult genList(String cacheKey, Class clazz, Class<? extends JsonContext> viewClazz, Type compType) {
     	
  
-    	Class<?> compTypeClazz = (Class<?>) compType;
+    	Class compTypeClazz = (Class) compType;
 
          boolean isCollectionValueNullable = true;
         if (cacheKey.endsWith("__value_not_nullable")) {

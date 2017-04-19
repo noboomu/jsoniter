@@ -69,7 +69,7 @@ public class TypeLiteral<T> {
      * anonymous class's type hierarchy so we can reconstitute it at runtime despite erasure.
      */
     @SuppressWarnings("unchecked")
-    protected TypeLiteral() {
+	public TypeLiteral() {
         this.type = getSuperclassTypeParameter(getClass());
         nativeType = nativeTypes.get(this.type);
         decoderCacheKey = generateDecoderCacheKey(type);

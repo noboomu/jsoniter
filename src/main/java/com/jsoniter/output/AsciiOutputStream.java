@@ -3,12 +3,12 @@ package com.jsoniter.output;
 import java.io.IOException;
 import java.io.OutputStream;
 
-class AsciiOutputStream extends OutputStream {
+public class AsciiOutputStream extends OutputStream {
     private char[] buf = new char[4096];
     private int count = 0;
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(final byte[] b, final  int off, final  int len) throws IOException {
         int i = off;
         for (; ; ) {
             for (; i < off + len && count < buf.length; i++) {
@@ -25,7 +25,7 @@ class AsciiOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(final  int b) throws IOException {
         if (count == buf.length) {
             char[] newBuf = new char[buf.length * 2];
             System.arraycopy(buf, 0, newBuf, 0, buf.length);

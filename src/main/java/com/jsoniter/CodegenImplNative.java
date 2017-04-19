@@ -35,7 +35,12 @@ class CodegenImplNative {
         put(Object.class.getName(), "iter.read()");
         put(Any.class.getName(), "iter.readAny()");
     }};
-    final static Map<Class, Decoder> NATIVE_DECODERS = new HashMap<Class, Decoder>() {{
+    final static Map<Class<?>, Decoder> NATIVE_DECODERS = new HashMap<Class<?>, Decoder>() {/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7523697381530370133L;
+
+	{
         put(float.class, new Decoder() {
             @Override
             public Object decode(JsonIterator iter) throws IOException {
@@ -170,12 +175,12 @@ class CodegenImplNative {
     }
 
     public static String getTypeName(Type fieldType) {
-        if (fieldType instanceof Class) {
-            Class clazz = (Class) fieldType;
+        if (fieldType instanceof Class<?>) {
+            Class<?> clazz = (Class<?>) fieldType;
             return clazz.getCanonicalName();
         } else if (fieldType instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) fieldType;
-            Class clazz = (Class) pType.getRawType();
+            Class<?> clazz = (Class<?>) pType.getRawType();
             return clazz.getCanonicalName();
         } else {
             throw new JsonException("unsupported type: " + fieldType);
@@ -198,8 +203,8 @@ class CodegenImplNative {
             cacheKey = TypeLiteral.create(valueType).getDecoderCacheKey();
             decoder = JsoniterSpi.getDecoder(cacheKey);
             if (decoder == null) {
-                if (valueType instanceof Class) {
-                    Class clazz = (Class) valueType;
+                if (valueType instanceof Class<?>) {
+                    Class<?> clazz = (Class<?>) valueType;
                     String nativeRead = NATIVE_READS.get(clazz.getCanonicalName());
                     if (nativeRead != null) {
                         return nativeRead;

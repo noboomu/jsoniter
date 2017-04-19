@@ -6,7 +6,7 @@ import java.util.Map;
 
 class CodegenImplMap {
 
-    public static String genMap(Class clazz, Type[] typeArgs) {
+    public static String genMap(Class<?> clazz, Type[] typeArgs) {
         Type valueType = typeArgs[1];
         StringBuilder lines = new StringBuilder();
         append(lines, "{{clazz}} map = ({{clazz}})com.jsoniter.CodegenAccess.resetExistingObject(iter);");

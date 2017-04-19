@@ -5,14 +5,14 @@ import java.util.*;
 
 class CodegenImplArray {
 
-    final static Set<Class> WITH_CAPACITY_COLLECTION_CLASSES = new HashSet<Class>() {{
+    final static Set<Class<?>> WITH_CAPACITY_COLLECTION_CLASSES = new HashSet<Class<?>>() {{
         add(ArrayList.class);
         add(HashSet.class);
         add(Vector.class);
     }};
 
-    public static String genArray(Class clazz) {
-        Class compType = clazz.getComponentType();
+    public static String genArray(Class<?> clazz) {
+        Class<?> compType = clazz.getComponentType();
         if (compType.isArray()) {
             throw new IllegalArgumentException("nested array not supported: " + clazz.getCanonicalName());
         }
@@ -77,7 +77,7 @@ class CodegenImplArray {
                 "{{op}}", CodegenImplNative.genReadOp(compType));
     }
 
-    public static String genCollection(Class clazz, Type[] typeArgs) {
+    public static String genCollection(Class<?> clazz, Type[] typeArgs) {
         if (WITH_CAPACITY_COLLECTION_CLASSES.contains(clazz)) {
             return CodegenImplArray.genCollectionWithCapacity(clazz, typeArgs[0]);
         } else {
@@ -85,7 +85,7 @@ class CodegenImplArray {
         }
     }
 
-    private static String genCollectionWithCapacity(Class clazz, Type compType) {
+    private static String genCollectionWithCapacity(Class<?> clazz, Type compType) {
         StringBuilder lines = new StringBuilder();
         append(lines, "{{clazz}} col = ({{clazz}})com.jsoniter.CodegenAccess.resetExistingObject(iter);");
         append(lines, "if (iter.readNull()) { com.jsoniter.CodegenAccess.resetExistingObject(iter); return null; }");
@@ -128,7 +128,7 @@ class CodegenImplArray {
                 "{{op}}", CodegenImplNative.genReadOp(compType));
     }
 
-    private static String genCollectionWithoutCapacity(Class clazz, Type compType) {
+    private static String genCollectionWithoutCapacity(Class<?> clazz, Type compType) {
         StringBuilder lines = new StringBuilder();
         append(lines, "if (iter.readNull()) { com.jsoniter.CodegenAccess.resetExistingObject(iter); return null; }");
         append(lines, "{{clazz}} col = ({{clazz}})com.jsoniter.CodegenAccess.resetExistingObject(iter);");

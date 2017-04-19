@@ -12,13 +12,13 @@ import com.jsoniter.output.JsonContext;
 public class JsoniterSpi
 {
 
-	static List<Extension> extensions = new ArrayList<Extension>();
-	static Map<Class, Class> typeImpls = new HashMap<Class, Class>();
-	static Map<Class, Map<Class, Class>> viewImpls = new HashMap<>();
+	private final static List<Extension> extensions = new ArrayList<Extension>();
+	private final static Map<Class, Class> typeImpls = new HashMap<>();
+	private final static Map<Class, Map<Class, Class>> viewImpls = new HashMap<>();
 
-	static volatile Map<String, Encoder> encoders = new HashMap<String, Encoder>();
-	static volatile Map<String, Decoder> decoders = new HashMap<String, Decoder>();
-	static volatile Map<Class, Extension> objectFactories = new HashMap<Class, Extension>();
+	private static volatile Map<String, Encoder> encoders = new HashMap<>();
+	private static volatile Map<String, Decoder> decoders = new HashMap<>();
+	private static volatile Map<Class, Extension> objectFactories = new HashMap<>();
 
 	public static void registerExtension(Extension extension)
 	{
@@ -128,7 +128,7 @@ public class JsoniterSpi
 
 	private synchronized static void addObjectFactory(Class clazz, Extension extension)
 	{
-		HashMap<Class, Extension> copy = new HashMap<Class, Extension>(objectFactories);
+		HashMap<Class, Extension> copy = new HashMap<>(objectFactories);
 		copy.put(clazz, extension);
 		objectFactories = copy;
 	}
@@ -242,11 +242,11 @@ public class JsoniterSpi
 	public static ClassDescriptor getEncodingClassDescriptor(Class clazz, Class<? extends JsonContext> viewClazz, boolean includingPrivate)
 	{
 
-		Set<Class<?>> parentClasses = new HashSet<Class<?>>();
+		Set<Class> parentClasses = new HashSet<>();
 
 		if (viewClazz != null)
 		{
-			Class<?> currentViewClass = viewClazz;
+			Class currentViewClass = viewClazz;
 
 			while (!currentViewClass.equals(Object.class))
 			{
@@ -285,7 +285,7 @@ public class JsoniterSpi
 				return b.annotations != null && b.annotations.length > 0;
 			}).forEach(b -> {
 
-				Set<Class<?>> viewClasses = Arrays.stream(b.annotations).filter(a -> {
+				Set<Class> viewClasses = Arrays.stream(b.annotations).filter(a -> {
 					return (a instanceof JsonView);
 				}).flatMap(a -> Arrays.stream(((JsonView) a).value())).collect(Collectors.toSet());
 
@@ -433,7 +433,7 @@ public class JsoniterSpi
 
 	private static void encodingDeduplicate(ClassDescriptor desc)
 	{
-		HashMap<String, Binding> byName = new HashMap<String, Binding>();
+		HashMap<String, Binding> byName = new HashMap<>();
 		for (Binding field : desc.fields)
 		{
 			if (byName.containsKey(field.name))
@@ -484,7 +484,7 @@ public class JsoniterSpi
 		return cctor;
 	}
 
-	@SuppressWarnings("unchecked")
+	 
 	private static List<Binding> getFields(Map<String, Type> lookup, Class clazz, Class<? extends JsonContext> viewClazz, boolean includingPrivate)
 	{
 		ArrayList<Binding> bindings = new ArrayList<Binding>();

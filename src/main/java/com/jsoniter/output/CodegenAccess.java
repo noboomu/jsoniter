@@ -57,11 +57,11 @@ public class CodegenAccess {
         StreamImplString.writeStringWithoutQuote(stream, obj);
     }
 
-    public static void staticGenEncoders(TypeLiteral[] typeLiterals) {
+    public static void staticGenEncoders(TypeLiteral<?>[] typeLiterals) {
         Codegen.staticGenEncoders(typeLiterals);
     }
 
-    public static Any wrap(Object val) {
+    public static <T> Any wrap(T val) {
         if (val == null) {
             return Any.wrapNull();
         }
