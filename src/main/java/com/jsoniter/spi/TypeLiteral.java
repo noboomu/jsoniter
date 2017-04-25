@@ -240,9 +240,9 @@ public class TypeLiteral<T> {
 
     public static TypeLiteral create(final Type valueType, final Class<? extends JsonContext> viewClazz) {
     	
-    	//final Type type;
+    	 final Type type;
     	
-//    	if(valueType instanceof ParameterizedTypeImpl)
+ //    	if(valueType instanceof ParameterizedTypeImpl)
 //    	{
 //    		ParameterizedTypeImpl pType = (ParameterizedTypeImpl)valueType;
 //    		if( pType.hasJsonContext() )
@@ -261,14 +261,14 @@ public class TypeLiteral<T> {
     			return typeLiteral;
     		}
     		
-          //  type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
+             type = new ParameterizedTypeImpl(new Type[]{valueType},null, viewClazz);
     	}
-//    	else
-//    	{
-//    		type = valueType;
-//    	}
+    	else
+    	{
+    		type = valueType;
+    	}
     	 
-    	final TypeLiteral  typeLiteral = typeLiteralCache.get(valueType);
+    	final TypeLiteral  typeLiteral = typeLiteralCache.get(type);
         if (typeLiteral != null) {
             return typeLiteral;
         }

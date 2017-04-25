@@ -54,13 +54,13 @@ class Codegen {
             }
         }
         Type[] typeArgs = new Type[0];
-        Class<?> clazz;
+        Class clazz;
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
-            clazz = (Class<?>) pType.getRawType();
+            clazz = (Class) pType.getRawType();
             typeArgs = pType.getActualTypeArguments();
         } else {
-            clazz = (Class<?>) type;
+            clazz = (Class) type;
         }
         decoder = CodegenImplNative.NATIVE_DECODERS.get(clazz);
         if (decoder != null) {
@@ -111,15 +111,15 @@ class Codegen {
 
     private static Type chooseImpl(Type type, Class<? extends JsonContext> viewClazz) {
         Type[] typeArgs = new Type[0];
-        Class<?> clazz;
+        Class clazz;
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
-            clazz = (Class<?>) pType.getRawType();
+            clazz = (Class) pType.getRawType();
             typeArgs = pType.getActualTypeArguments();
         } else {
-            clazz = (Class<?>) type;
+            clazz = (Class) type;
         }
-        Class<?> implClazz = JsoniterSpi.getTypeImplementation(clazz);
+        Class implClazz = JsoniterSpi.getTypeImplementation(clazz);
          if (Collection.class.isAssignableFrom(clazz)) {
             Type compType = Object.class;
             if (typeArgs.length == 0) {
@@ -208,7 +208,7 @@ class Codegen {
         }
     }
 
-    private static String genSource(Class<?> clazz, Type[] typeArgs) {
+    private static String genSource(Class clazz, Type[] typeArgs) {
         if (clazz.isArray()) {
             return CodegenImplArray.genArray(clazz);
         }

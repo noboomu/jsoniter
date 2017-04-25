@@ -35,13 +35,16 @@ public class Codegen {
     }
 
 
-    public static Encoder getReflectionEncoder(String cacheKey, Type type) {
+    public static Encoder getReflectionEncoder(String cacheKey, Type type) 
+    {
         Encoder encoder = CodegenImplNative.NATIVE_ENCODERS.get(type);
-        if (encoder != null) {
+        if (encoder != null) 
+        {
             return encoder;
         }
         encoder = reflectionEncoders.get(cacheKey);
-        if (encoder != null) {
+        if (encoder != null) 
+        {
             return encoder;
         }
         synchronized (Codegen.class) {
@@ -50,13 +53,13 @@ public class Codegen {
                 return encoder;
             }
             Type[] typeArgs = new Type[0];
-            Class<?> clazz;
+            Class clazz;
             if (type instanceof ParameterizedType) {
                 ParameterizedType pType = (ParameterizedType) type;
-                clazz = (Class<?>) pType.getRawType();
+                clazz = (Class) pType.getRawType();
                 typeArgs = pType.getActualTypeArguments();
             } else {
-                clazz = (Class<?>) type;
+                clazz = (Class) type;
             }
             encoder = ReflectionEncoderFactory.create(clazz, typeArgs);
             HashMap<String, Encoder> copy = new HashMap<String, Encoder>(reflectionEncoders);
@@ -168,13 +171,13 @@ public class Codegen {
             return encoder;
         }
         Type[] typeArgs = new Type[0];
-        Class<?> clazz;
+        Class clazz;
         if (type instanceof ParameterizedType) {
             ParameterizedType pType = (ParameterizedType) type;
-            clazz = (Class<?>) pType.getRawType();
+            clazz = (Class) pType.getRawType();
             typeArgs = pType.getActualTypeArguments();
         } else {
-            clazz = (Class<?>) type;
+            clazz = (Class) type;
         }
         if (mode == EncodingMode.REFLECTION_MODE) {
         	 
@@ -216,7 +219,7 @@ public class Codegen {
         }
     }
 
-    private static Class<?> chooseAccessibleSuper(Class<?> clazz) {
+    private static Class chooseAccessibleSuper(Class clazz) {
         if (Modifier.isPublic(clazz.getModifiers())) {
             return clazz;
         }
@@ -227,7 +230,7 @@ public class Codegen {
         return generatedSources.get(cacheKey);
     }
 
-    private static void staticGen(Class<?> clazz, String cacheKey, CodegenResult source) throws IOException {
+    private static void staticGen(Class clazz, String cacheKey, CodegenResult source) throws IOException {
         createDir(cacheKey);
         String fileName = cacheKey.replace('.', '/') + ".java";
         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
@@ -243,7 +246,7 @@ public class Codegen {
         }
     }
 
-    private static void staticGen(Class <?>clazz, String cacheKey, OutputStreamWriter writer, CodegenResult source) throws IOException {
+    private static void staticGen(Class clazz, String cacheKey, OutputStreamWriter writer, CodegenResult source) throws IOException {
         String className = cacheKey.substring(cacheKey.lastIndexOf('.') + 1);
         String packageName = cacheKey.substring(0, cacheKey.lastIndexOf('.'));
         writer.write("package " + packageName + ";\n");
@@ -280,7 +283,7 @@ public class Codegen {
 //        return CodegenImplObject.genObject(clazz);
 //    }
     
-    private static CodegenResult genSource(final String cacheKey, final Class<?> clazz, final Class<? extends JsonContext> viewClazz, final Type[] typeArgs) {
+    private static CodegenResult genSource(final String cacheKey, final Class clazz, final Class<? extends JsonContext> viewClazz, final Type[] typeArgs) {
         if (clazz.isArray()) {
             return CodegenImplArray.genArray(cacheKey, clazz, viewClazz);
         }
@@ -296,9 +299,9 @@ public class Codegen {
         return CodegenImplObject.genObject(clazz,viewClazz);
     }
 
-    public static void staticGenEncoders(TypeLiteral<?>[] typeLiterals) {
+    public static void staticGenEncoders(TypeLiteral[] typeLiterals) {
         isDoingStaticCodegen = true;
-        for (TypeLiteral<?> typeLiteral : typeLiterals) {
+        for (TypeLiteral typeLiteral : typeLiterals) {
             gen(typeLiteral.getEncoderCacheKey(), typeLiteral.getType(), null);
         }
     }

@@ -75,7 +75,7 @@ public interface Encoder<T> {
     public abstract class LongEncoder implements Encoder<Long> {
         @Override
         public void encode(Long obj, JsonStream stream) throws IOException {
-            encodeLong(  obj, stream);
+            encodeLong((Long) obj, stream);
         }
 
         @Override
@@ -100,7 +100,7 @@ public interface Encoder<T> {
     public abstract class FloatEncoder implements Encoder<Float> {
         @Override
         public void encode(Float obj, JsonStream stream) throws IOException {
-            encodeFloat((Float) obj, stream);
+            encodeFloat(  obj, stream);
         }
 
         @Override
@@ -125,7 +125,7 @@ public interface Encoder<T> {
     public abstract class DoubleEncoder implements Encoder<Double> {
         @Override
         public void encode(Double obj, JsonStream stream) throws IOException {
-            encodeDouble((Double) obj, stream);
+            encodeDouble(  obj, stream);
         }
 
         @Override

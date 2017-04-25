@@ -20,11 +20,6 @@ public class CodegenImplNative
 {
 	public static final Map<Type, Encoder> NATIVE_ENCODERS = new IdentityHashMap<Type, Encoder>()
 	{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 4674532708840309972L;
-
 		{
 			put(boolean.class, new Encoder<Boolean>()
 			{
@@ -309,8 +304,9 @@ public class CodegenImplNative
 			{
 				@Override
 				public void encode(BigDecimal obj, JsonStream stream) throws IOException
-				{ 
-					stream.writeRaw(obj.toString());
+				{
+					BigDecimal val = (BigDecimal) obj;
+					stream.writeRaw(val.toString());
 				}
 
 				@Override
@@ -324,8 +320,8 @@ public class CodegenImplNative
 				@Override
 				public void encode(BigInteger obj, JsonStream stream) throws IOException
 				{
-			 
-					stream.writeRaw(obj.toString());
+					BigInteger val = (BigInteger) obj;
+					stream.writeRaw(val.toString());
 				}
 
 				@Override
@@ -374,6 +370,16 @@ public class CodegenImplNative
 					ctx.append(String.format("stream.writeFloat(%s);", code));
 
 				}
+				else if (type.getTypeName().equals("java.lang.Integer"))
+				{
+					ctx.append(String.format("stream.writeInt(%s);", code));
+
+				}
+				else if (type.getTypeName().equals("java.lang.Short"))
+				{
+					ctx.append(String.format("stream.writeShort(%s);", code));
+
+				}
 				else if (type.getTypeName().equals("java.lang.Boolean"))
 				{
 					ctx.append(String.format("stream.writeBool(%s);", code));
@@ -412,7 +418,7 @@ public class CodegenImplNative
 //				// System.out.println("compType: " + compType);
 //				if (compType instanceof Class)
 //				{
-//					Class<?> compTypeClass = (Class<?>) compType;
+//					Class compTypeClass = (Class) compType;
 //
 //					if (compType.getTypeName().contains("java.lang.String"))
 //					{
@@ -487,13 +493,13 @@ public class CodegenImplNative
 	{
 		if (fieldType instanceof Class)
 		{
-			Class<?> clazz = (Class<?>) fieldType;
+			Class clazz = (Class) fieldType;
 			return clazz.getCanonicalName();
 		}
 		else if (fieldType instanceof ParameterizedType)
 		{
 			ParameterizedType pType = (ParameterizedType) fieldType;
-			Class<?> clazz = (Class<?>) pType.getRawType();
+			Class clazz = (Class) pType.getRawType();
 			return clazz.getCanonicalName();
 		}
 		else
@@ -502,7 +508,7 @@ public class CodegenImplNative
 		}
 	}
 
-	public static CodegenResult genEnum(Class<?> clazz)
+	public static CodegenResult genEnum(Class clazz)
 	{
 		CodegenResult ctx = new CodegenResult();
 		ctx.append(String.format("public static void encode_(java.lang.Object obj, com.jsoniter.output.JsonStream stream) throws java.io.IOException {", clazz.getCanonicalName()));

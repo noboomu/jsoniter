@@ -71,6 +71,7 @@ public class JsonStream extends OutputStream {
         this.count = 0;
     }
     
+   
     public final void write(int b) throws IOException {
         if (count == buf.length) {
             flushBuffer();
@@ -259,7 +260,7 @@ public class JsonStream extends OutputStream {
         }
     }
 
-    public final void writeVal(short val) throws IOException {
+    public final void writeVal(final short val) throws IOException {
         writeVal((int) val);
     }
 
@@ -271,7 +272,7 @@ public class JsonStream extends OutputStream {
         }
     }
 
-    public final void writeVal(int val) throws IOException {
+    public final void writeVal(final int val) throws IOException {
         StreamImplNumber.writeInt(this, val);
     }
 
@@ -283,23 +284,14 @@ public class JsonStream extends OutputStream {
             writeVal(val.longValue());
         }
     }
-    
-    public final void writeLong(Long val) throws IOException {
-    	  if (val == null) {
-              writeNull();
-          }
-    	  else
-    	  {
-    	     StreamImplNumber.writeLong(this, val); 
-    	  }
-    }
+ 
 
     public final void writeVal(long val) throws IOException {
         StreamImplNumber.writeLong(this, val);
     }
 
 
-    public final void writeVal(Float val) throws IOException {
+    public final void writeVal(final Float val) throws IOException {
         if (val == null) {
             writeNull();
         } else {
@@ -308,15 +300,9 @@ public class JsonStream extends OutputStream {
     }
     
 
-    public final void writeFloat(Float val) throws IOException {
-        if (val == null) {
-            writeNull();
-        } else {
-            writeVal(val.floatValue());
-        }
-    }
+   
 
-    public final void writeVal(float val) throws IOException {
+    public final void writeVal(final float val) throws IOException {
         StreamImplNumber.writeFloat(this, val);
     }
 
@@ -329,8 +315,35 @@ public class JsonStream extends OutputStream {
     }
     
     
+    public final void writeLong(final Long val) throws IOException {
+    	  if (val == null) {
+              writeNull();
+          }
+    	  else
+    	  {
+    	     StreamImplNumber.writeLong(this, val); 
+    	  }
+    }
     
-    public final void writeDouble(Double val) throws IOException {
+    public final void writeFloat(final Float val) throws IOException {
+        if (val == null) {
+            writeNull();
+        } else {
+            StreamImplNumber.writeFloat(this, val);
+        }
+    }
+    
+    public final void writeInt(final Integer val) throws IOException {
+    	if (val == null) {
+            writeNull();
+        } else {
+        	
+            StreamImplNumber.writeInt(this, val);
+
+        }
+     }
+    
+    public final void writeDouble(final Double val) throws IOException {
     	if (val == null) {
             writeNull();
         } else {
@@ -339,12 +352,22 @@ public class JsonStream extends OutputStream {
 
         }
      }
+    
+    public final void writeShort(final Short val) throws IOException {
+    	if (val == null) {
+            writeNull();
+        } else {
+        	
+            StreamImplNumber.writeInt(this, val);
 
-    public final void writeVal(double val) throws IOException {
+        }
+     }
+
+    public final void writeVal(final double val) throws IOException {
         StreamImplNumber.writeDouble(this, val);
     }
 
-    public final void writeVal(Any val) throws IOException {
+    public final void writeVal(final Any val) throws IOException {
         val.writeTo(this);
     }
 
@@ -417,7 +440,7 @@ public class JsonStream extends OutputStream {
         write(OBJECT_END);
     }
 
-    public final <T> void writeVal(final T obj) throws IOException {
+    public final  void writeVal(final Object obj) throws IOException {
         if (obj == null) {
             writeNull();
             return;
@@ -427,7 +450,7 @@ public class JsonStream extends OutputStream {
         Codegen.getEncoder(cacheKey, clazz,null).encode(obj, this);
     }
 
-    public final <T> void writeVal(final TypeLiteral<T> typeLiteral, final T obj) throws IOException {
+    public final  void writeVal(final TypeLiteral  typeLiteral, final Object obj) throws IOException {
         if (null == obj) {
             writeNull();
         } else {
@@ -435,17 +458,18 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public final <T> void writeViewVal(final T obj, final Class<? extends JsonContext> viewClass) throws IOException {
+    public final  void writeViewVal(final Object obj, final Class<? extends JsonContext> viewClass) throws IOException {
         if (obj == null) {
             writeNull();
             return;
         }
-        final Class<?> clazz = obj.getClass();
+        final Class clazz = obj.getClass();
         final String cacheKey = TypeLiteral.create(clazz,viewClass).getEncoderCacheKey();
+    
          Codegen.getEncoder(cacheKey, clazz,viewClass).encode(obj, this);
     }
 
-    public final <T> void writeViewVal(final TypeLiteral<T> typeLiteral, final T obj, final Class<? extends JsonContext> viewClass) throws IOException {
+    public final   void writeViewVal(final TypeLiteral typeLiteral, final Object obj, final Class<? extends JsonContext> viewClass) throws IOException {
         if (null == obj) {
             writeNull();
         } else {
@@ -459,14 +483,28 @@ public class JsonStream extends OutputStream {
             return new JsonStream(null, 4096);
         }
     };
+    
+    public static JsonStream localStream()
+    {
+    	AsciiOutputStream asciiOutputStream = tlsAsciiOutputStream.get();
+        asciiOutputStream.reset();
+           
+        JsonStream stream = tlsStream.get();
+        
+        stream.reset(asciiOutputStream);
+        
+        return stream;
+    }
 
-    public static <T> void  serialize(final T obj, final OutputStream out) {
+    public static   void  serialize(final Object obj, final OutputStream out) 
+    {
     	final JsonStream stream = tlsStream.get();
         try {
             try {
                 stream.reset(out);
                 stream.writeVal(obj);
-            } finally {
+            } finally 
+            {
                 stream.close();
             }
         } catch (IOException e) {
@@ -474,7 +512,7 @@ public class JsonStream extends OutputStream {
         }
     }
     
-    public static  <T> void serialize(final T obj, final Class<? extends JsonContext> viewClazz, final OutputStream out) {
+    public static   void serialize(final Object obj, final Class<? extends JsonContext> viewClazz, final OutputStream out) {
     	final JsonStream stream = tlsStream.get();
         try {
             try {
@@ -495,7 +533,7 @@ public class JsonStream extends OutputStream {
         }
     };
     
-    public static <T> String serialize(T obj,Class<? extends JsonContext> viewClazz) {
+    public static  String serialize(Object obj,Class<? extends JsonContext> viewClazz) {
         AsciiOutputStream asciiOutputStream = tlsAsciiOutputStream.get();
         asciiOutputStream.reset();
         serialize(obj, viewClazz, asciiOutputStream);
@@ -513,12 +551,16 @@ public class JsonStream extends OutputStream {
         Codegen.setMode(mode);
     }
 
-    public static void registerNativeEncoder(Class<?> clazz, Encoder encoder) {
+    public static void registerNativeEncoder(Class clazz, Encoder encoder) {
         CodegenImplNative.NATIVE_ENCODERS.put(clazz, encoder);
     }
     
     public  String toString() {
         return new String(buf, 0, count);
+    }
+    
+    public OutputStream getOutputStream() {
+        return this.out;
     }
     
     public  byte toByteArray()[] {

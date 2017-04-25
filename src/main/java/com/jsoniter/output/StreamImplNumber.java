@@ -33,7 +33,7 @@ package com.jsoniter.output;
 
 import java.io.IOException;
 
-class StreamImplNumber {
+public class StreamImplNumber {
 
     private final static int[] DIGITS = new int[1000];
 

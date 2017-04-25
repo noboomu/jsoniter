@@ -33,7 +33,7 @@ package com.jsoniter.output;
 
 import java.io.IOException;
 
-class StreamImplString {
+public class StreamImplString {
 
     private static final byte[] ITOA = new byte[]{
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
