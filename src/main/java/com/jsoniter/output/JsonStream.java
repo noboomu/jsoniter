@@ -86,6 +86,13 @@ public class JsonStream extends OutputStream {
         buf[count++] = b;
     }
     
+    public final void writeByte(char c) throws IOException { 
+   	 if (count >= buf.length - 1) {
+            flushBuffer();
+        }
+       buf[count++] = (byte)c;
+   }
+    
     public final void write(byte b1, byte b2) throws IOException {
         if (count >= buf.length - 1) {
             flushBuffer();
