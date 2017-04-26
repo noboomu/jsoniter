@@ -19,17 +19,17 @@
 
     <developers>
         <developer>
-            <name>Tao Wen</name>
-            <email>taowen@gmail.com</email>
-            <organization>jsoniter</organization>
-            <organizationUrl>http://jsoniter.com</organizationUrl>
+            <name>Joshua Bauer</name>
+            <email>tjosh@wurrly.com</email>
+            <organization>Wurrly</organization>
+            <organizationUrl>http://wurrly.com</organizationUrl>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/json-iterator/java.git</connection>
-        <developerConnection>scm:git:ssh://github.com:json-iterator/java.git</developerConnection>
-        <url>http://github.com/json-iterator/java/tree/master</url>
+        <connection>scm:git:git://github.com/noboomu/jsoniter.git</connection>
+        <developerConnection>scm:git:ssh://github.com:noboomu/jsoniter.git</developerConnection>
+        <url>http://github.com/noboomu/jsoniter/tree/master</url>
     </scm>
 
     <properties>
@@ -123,7 +123,7 @@
                     </execution>
                 </executions>
             </plugin> -->
-          <!--   <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.5</version>
@@ -137,7 +137,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+       <!--      <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.7</version>
@@ -147,7 +147,7 @@
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
@@ -159,7 +159,7 @@
                     <goals>deploy</goals>
                 </configuration>
             </plugin>
-            <plugin>
+           <!--  <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
@@ -180,10 +180,10 @@
         </plugins>
     </build>
 
-    <distributionManagement>
+<!--     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
-    </distributionManagement>
+    </distributionManagement> -->
 </project>
