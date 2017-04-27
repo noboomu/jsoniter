@@ -10,12 +10,14 @@ import java.lang.annotation.Target;
  
 
 /**
+ * Copied from Jackson's JsonView
+ * 
  * @author jbauer
  *
  */
 @Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.FIELD,
-    ElementType.PARAMETER, // since 2.5
-    ElementType.TYPE // since 2.9, to indicate "default view" for properties
+    ElementType.PARAMETER,  
+    ElementType.TYPE 
 })
 @Retention(RetentionPolicy.RUNTIME) 
 public @interface JsonView {
