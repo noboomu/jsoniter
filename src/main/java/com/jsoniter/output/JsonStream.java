@@ -8,6 +8,7 @@ import com.jsoniter.spi.TypeLiteral;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class JsonStream extends OutputStream {
@@ -540,6 +541,28 @@ public class JsonStream extends OutputStream {
         }
     };
     
+    private final static ThreadLocal<AsyncByteOutputStream> tlsAsyncByteOutputStream = new ThreadLocal<AsyncByteOutputStream>() {
+        @Override
+        protected AsyncByteOutputStream initialValue() {
+            return new AsyncByteOutputStream();
+        }
+    };
+    
+    
+    public static ByteBuffer serializeToBytes(Object obj,Class<? extends JsonContext> viewClazz) {
+        AsyncByteOutputStream asyncByteOutputStream = tlsAsyncByteOutputStream.get();
+        asyncByteOutputStream.reset();
+        serialize(obj, viewClazz, asyncByteOutputStream);
+        return asyncByteOutputStream.toByteBuffer();
+    }
+    
+    public static  ByteBuffer serializeToBytes(Object obj) {
+        AsyncByteOutputStream asyncByteOutputStream = tlsAsyncByteOutputStream.get();
+        asyncByteOutputStream.reset();
+        serialize(obj, asyncByteOutputStream);
+        return asyncByteOutputStream.toByteBuffer();
+    }
+    
     public static  String serialize(Object obj,Class<? extends JsonContext> viewClazz) {
         AsciiOutputStream asciiOutputStream = tlsAsciiOutputStream.get();
         asciiOutputStream.reset();
@@ -570,7 +593,5 @@ public class JsonStream extends OutputStream {
         return this.out;
     }
     
-    public  byte toByteArray()[] {
-        return Arrays.copyOf(buf, count);
-    }
+  
 }

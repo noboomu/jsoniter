@@ -2,6 +2,7 @@ package com.jsoniter.output;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class AsciiOutputStream extends OutputStream {
     private char[] buf = new char[4096];
@@ -38,6 +39,7 @@ public class AsciiOutputStream extends OutputStream {
     public String toString() {
         return new String(buf, 0, count);
     }
+
 
     public void reset() {
         count = 0;
