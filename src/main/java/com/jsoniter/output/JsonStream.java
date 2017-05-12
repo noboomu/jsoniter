@@ -174,6 +174,15 @@ public class JsonStream extends OutputStream {
         this.out = null;
         count = 0;
     }
+    
+  
+    public void closeStream() throws IOException {
+        if (count > 0) {
+            flushBuffer();
+        } 
+        this.out = null;
+        count = 0;
+    }
 
     final void flushBuffer() throws IOException {
         out.write(buf, 0, count);
@@ -514,6 +523,22 @@ public class JsonStream extends OutputStream {
             } finally 
             {
                 stream.close();
+            }
+        } catch (IOException e) {
+            throw new JsonException(e);
+        }
+    }
+    
+    public static void  serializeWithoutClose(final Object obj, final OutputStream out) 
+    {
+    	final JsonStream stream = tlsStream.get();
+        try {
+            try {
+                stream.reset(out);
+                stream.writeVal(obj);
+            } finally 
+            {
+                stream.closeStream();
             }
         } catch (IOException e) {
             throw new JsonException(e);
